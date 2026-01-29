@@ -1,5 +1,6 @@
 use crate::cli::output::Printer;
 use crate::config::Config;
+use crate::core::effect::{self, Effect};
 use crate::core::Error;
 use std::path::Path;
 
@@ -11,7 +12,7 @@ const HEADER: &str = "\
 
 ";
 
-pub fn run(config_path: &Path, printer: &Printer) -> Result<(), Error> {
+pub fn run(config_path: &Path, dry_run: bool, printer: &Printer) -> Result<(), Error> {
     if config_path.exists() {
         return Err(Error::General(format!(
             "config already exists: {}",
@@ -24,13 +25,16 @@ pub fn run(config_path: &Path, printer: &Printer) -> Result<(), Error> {
         .map_err(|e| Error::General(format!("failed to serialize config: {e}")))?;
 
     let content = format!("{HEADER}{toml_body}");
-    std::fs::write(config_path, &content).map_err(|e| {
-        Error::General(format!(
-            "failed to write {}: {e}",
-            config_path.display()
-        ))
-    })?;
+    let effects = vec![Effect::WriteFile {
+        path: config_path.to_path_buf(),
+        content,
+    }];
 
-    printer.print_init(config_path);
+    effect::execute(None, &effects, dry_run, printer)?;
+
+    if !dry_run {
+        printer.print_init(config_path);
+    }
+
     Ok(())
 }

@@ -9,7 +9,7 @@ fn run() -> Result<(), git_atomic::core::Error> {
 
     match cli.command {
         Some(Command::Atomize(ref args)) => {
-            git_atomic::cli::commands::atomize::run(args, &cli.config, &printer)
+            git_atomic::cli::commands::atomize::run(args, &cli.config, cli.dry_run, &printer)
         }
         Some(Command::Status(ref args)) => {
             git_atomic::cli::commands::status::run(args, &cli.config, &printer)
@@ -18,19 +18,18 @@ fn run() -> Result<(), git_atomic::core::Error> {
             git_atomic::cli::commands::validate::run(&cli.config, &printer)
         }
         Some(Command::Init) => {
-            git_atomic::cli::commands::init::run(&cli.config, &printer)
+            git_atomic::cli::commands::init::run(&cli.config, cli.dry_run, &printer)
         }
         None => {
             let args = AtomizeArgs {
                 commit: "HEAD".into(),
                 range: None,
-                dry_run: false,
                 force: false,
                 ci_mode: false,
                 push: false,
                 remote: "origin".into(),
             };
-            git_atomic::cli::commands::atomize::run(&args, &cli.config, &printer)
+            git_atomic::cli::commands::atomize::run(&args, &cli.config, cli.dry_run, &printer)
         }
     }
 }

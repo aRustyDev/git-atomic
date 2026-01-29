@@ -1,4 +1,4 @@
-# Phase 4: Testing & Documentation
+# Phase 6: Testing & Documentation
 
 **Status**: Not Started
 **Issue**: TBD
@@ -29,6 +29,8 @@ Comprehensive testing, documentation, and release preparation.
 - Phase 1: Core Parsing
 - Phase 2: Branch Operations
 - Phase 3: CLI Interface
+- Phase 4: Effect Collection
+- Phase 5: Structured Dry-Run Output
 
 ## Acceptance Criteria
 

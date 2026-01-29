@@ -1,3 +1,4 @@
+use crate::core::effect::Effect;
 use crate::git::atomize::AtomicResult;
 use crate::git::branch::BranchState;
 use owo_colors::OwoColorize;
@@ -151,6 +152,90 @@ impl Printer {
             }
             OutputMode::Human => {
                 eprintln!("{} {}", "✗".red(), err);
+            }
+        }
+    }
+
+    pub fn print_effect_preview(&self, effect: &Effect) {
+        match self.mode {
+            OutputMode::Quiet => {}
+            OutputMode::Json => {
+                let desc = match effect {
+                    Effect::RefTransaction { edits, .. } => {
+                        serde_json::json!({
+                            "effect": "ref_transaction",
+                            "dry_run": true,
+                            "refs": edits.iter().map(|e| {
+                                serde_json::json!({
+                                    "ref": e.ref_name,
+                                    "component": e.component,
+                                    "action": if e.created { "create" } else { "update" },
+                                })
+                            }).collect::<Vec<_>>(),
+                        })
+                    }
+                    Effect::Push { remote, branches } => {
+                        serde_json::json!({
+                            "effect": "push",
+                            "dry_run": true,
+                            "remote": remote,
+                            "branches": branches,
+                        })
+                    }
+                    Effect::WriteFile { path, content } => {
+                        serde_json::json!({
+                            "effect": "write_file",
+                            "dry_run": true,
+                            "path": path.display().to_string(),
+                            "content": content,
+                        })
+                    }
+                };
+                println!("{}", serde_json::to_string_pretty(&desc).unwrap());
+            }
+            OutputMode::Human => {
+                let mut out = io::stdout().lock();
+                match effect {
+                    Effect::RefTransaction { edits, .. } => {
+                        for e in edits {
+                            let action = if e.created { "create" } else { "update" };
+                            let branch = e.ref_name
+                                .strip_prefix("refs/heads/")
+                                .unwrap_or(&e.ref_name);
+                            let _ = writeln!(
+                                out,
+                                "  {} would {} branch {}",
+                                "▸".dimmed(),
+                                action,
+                                branch.bold()
+                            );
+                        }
+                    }
+                    Effect::Push { remote, branches } => {
+                        let _ = writeln!(
+                            out,
+                            "  {} would push {} branch{} to {}",
+                            "▸".dimmed(),
+                            branches.len(),
+                            if branches.len() == 1 { "" } else { "es" },
+                            remote.bold()
+                        );
+                    }
+                    Effect::WriteFile { path, content } => {
+                        let _ = writeln!(
+                            out,
+                            "  {} would create {}",
+                            "▸".dimmed(),
+                            path.display().bold()
+                        );
+                        if self.verbosity > 0 || content.len() < 4096 {
+                            let _ = writeln!(out);
+                            for line in content.lines() {
+                                let _ = writeln!(out, "    {}", line.dimmed());
+                            }
+                        }
+                    }
+                }
             }
         }
     }

@@ -34,6 +34,10 @@ pub struct Cli {
     #[arg(long, global = true)]
     pub json: bool,
 
+    /// Show what would happen without performing any mutations.
+    #[arg(long, global = true)]
+    pub dry_run: bool,
+
     #[command(subcommand)]
     pub command: Option<Command>,
 }
@@ -62,10 +66,6 @@ pub struct AtomizeArgs {
     /// Atomize every commit in a range (e.g. main..feature).
     #[arg(long, value_name = "START..END")]
     pub range: Option<String>,
-
-    /// Show what would happen without creating or updating any branches.
-    #[arg(long)]
-    pub dry_run: bool,
 
     /// Overwrite branches that have diverged from the base branch.
     #[arg(long)]

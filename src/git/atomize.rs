@@ -1,4 +1,5 @@
 use crate::config::Config;
+use crate::core::effect::{Effect, PlannedRefEdit};
 use crate::core::{ComponentMatcher, Error, GitError};
 use crate::git::branch::{BranchManager, BranchState};
 use crate::git::commit;
@@ -15,23 +16,18 @@ pub struct AtomicResult {
     pub created: bool,
 }
 
-/// A commit ready to be applied via ref update.
-struct PreparedCommit {
-    ref_name: String,
-    commit_id: ObjectId,
-    /// Previous ref value (None if branch is new).
-    previous: Option<ObjectId>,
-}
-
-/// Atomize a source commit into per-component branches.
-pub fn atomize(
+/// Plan atomization of a source commit into per-component branches.
+///
+/// Returns the results and a list of effects to execute. Tree/commit object
+/// writes happen inline (they're immutable and harmless without refs), but
+/// the ref transaction is returned as an effect for the caller to execute.
+pub fn plan_atomize(
     repo: &gix::Repository,
     config: &Config,
     matcher: &ComponentMatcher,
     source_ref: &str,
     force: bool,
-    dry_run: bool,
-) -> Result<Vec<AtomicResult>, Error> {
+) -> Result<(Vec<AtomicResult>, Vec<Effect>), Error> {
     // 1. Resolve source commit and get changed files
     let source_id = crate::git::resolve_commit(repo, source_ref)?;
     let source_commit = repo
@@ -76,7 +72,7 @@ pub fn atomize(
     let branch_mgr = BranchManager::new(repo, base_id, config.settings.branch_template.clone());
 
     // 4. Build all commits first (all-or-nothing)
-    let mut prepared: Vec<PreparedCommit> = Vec::new();
+    let mut planned_edits: Vec<PlannedRefEdit> = Vec::new();
     let mut results: Vec<AtomicResult> = Vec::new();
 
     for (component_name, component_files) in &grouped {
@@ -109,14 +105,16 @@ pub fn atomize(
         let file_refs: Vec<&std::path::Path> = component_files.iter().map(|p| p.as_ref()).collect();
         let tree_id = commit::build_partial_tree(repo, &source_tree, &file_refs)?;
 
-        // Generate message and create commit
+        // Generate message and create commit object (immutable, safe without refs)
         let message = commit::generate_message(component_name, commit_type, &source_summary);
         let commit_id = commit::create_commit(repo, tree_id, parent_id, &message, source_author)?;
 
-        prepared.push(PreparedCommit {
+        planned_edits.push(PlannedRefEdit {
             ref_name: ref_name.clone(),
-            commit_id,
+            new_id: commit_id,
             previous,
+            component: component_name.to_string(),
+            created,
         });
 
         let branch_display = ref_name
@@ -133,44 +131,21 @@ pub fn atomize(
         });
     }
 
-    // 5. Atomically update all refs
-    let mut edits: Vec<gix::refs::transaction::RefEdit> = Vec::new();
-    for p in &prepared {
-        let target = gix::refs::Target::Object(p.commit_id);
-        let expected = match p.previous {
-            Some(id) => gix::refs::transaction::PreviousValue::MustExistAndMatch(
-                gix::refs::Target::Object(id),
-            ),
-            None => gix::refs::transaction::PreviousValue::MustNotExist,
-        };
-
-        edits.push(gix::refs::transaction::RefEdit {
-            change: gix::refs::transaction::Change::Update {
-                log: gix::refs::transaction::LogChange {
-                    mode: gix::refs::transaction::RefLog::AndReference,
-                    force_create_reflog: false,
-                    message: "git-atomic: atomize".into(),
-                },
-                expected,
-                new: target,
-            },
-            name: gix::refs::FullName::try_from(p.ref_name.clone())
-                .map_err(|e| GitError::RefUpdate {
-                    branch: p.ref_name.clone(),
-                    reason: format!("invalid ref name: {e}"),
-                })?,
-            deref: false,
+    // 5. Collect ref transaction as an effect
+    let mut effects = Vec::new();
+    if !planned_edits.is_empty() {
+        let repo_path = repo
+            .path()
+            .parent()
+            .unwrap_or(repo.path())
+            .to_path_buf();
+        effects.push(Effect::RefTransaction {
+            repo_path,
+            edits: planned_edits,
         });
     }
 
-    if !edits.is_empty() && !dry_run {
-        repo.edit_references(edits).map_err(|e| GitError::RefUpdate {
-            branch: "batch update".into(),
-            reason: e.to_string(),
-        })?;
-    }
-
-    Ok(results)
+    Ok((results, effects))
 }
 
 /// Extract the first line of the commit message as a summary.
@@ -235,6 +210,29 @@ commit_type = "fix"
     }
 
     #[test]
+    fn plan_atomize_returns_effects_without_mutating() {
+        let dir = tempfile::tempdir().unwrap();
+        setup_multi_component_repo(dir.path());
+
+        let repo = crate::git::open_repo(dir.path()).unwrap();
+        let config = test_config();
+        let matcher = ComponentMatcher::from_config(&config).unwrap();
+
+        let (results, effects) =
+            plan_atomize(&repo, &config, &matcher, "HEAD", false).unwrap();
+
+        assert_eq!(results.len(), 2);
+        assert_eq!(effects.len(), 1); // one RefTransaction
+
+        // Branches should NOT exist yet (effects not executed)
+        for result in &results {
+            let ref_name = format!("refs/heads/{}", result.branch);
+            let reference = repo.try_find_reference(&ref_name).unwrap();
+            assert!(reference.is_none(), "branch {} should not exist yet", result.branch);
+        }
+    }
+
+    #[test]
     fn atomize_creates_branches() {
         let dir = tempfile::tempdir().unwrap();
         setup_multi_component_repo(dir.path());
@@ -243,7 +241,12 @@ commit_type = "fix"
         let config = test_config();
         let matcher = ComponentMatcher::from_config(&config).unwrap();
 
-        let results = atomize(&repo, &config, &matcher, "HEAD", false, false).unwrap();
+        let (results, effects) =
+            plan_atomize(&repo, &config, &matcher, "HEAD", false).unwrap();
+
+        // Execute effects to create branches
+        let printer = crate::cli::output::Printer::new(false, true, 0);
+        crate::core::effect::execute(Some(&repo), &effects, false, &printer).unwrap();
 
         assert_eq!(results.len(), 2);
 
@@ -278,7 +281,11 @@ commit_type = "fix"
         let config = test_config();
         let matcher = ComponentMatcher::from_config(&config).unwrap();
 
-        let results = atomize(&repo, &config, &matcher, "HEAD", false, false).unwrap();
+        let (results, effects) =
+            plan_atomize(&repo, &config, &matcher, "HEAD", false).unwrap();
+
+        let printer = crate::cli::output::Printer::new(false, true, 0);
+        crate::core::effect::execute(Some(&repo), &effects, false, &printer).unwrap();
 
         for result in &results {
             let c = repo.find_commit(result.commit_id).unwrap();

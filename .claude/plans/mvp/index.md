@@ -2,7 +2,7 @@
 
 **Status**: Planning
 **Target**: v0.1.0 (MVP)
-**Last Updated**: 2025-01-28
+**Last Updated**: 2026-01-29
 
 ## Overview
 
@@ -15,18 +15,22 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 | Phase | Status | Issue | Description |
 |-------|--------|-------|-------------|
 | Phase 0 | Complete | - | Decisions & ADRs |
-| Phase 1 | Not Started | - | Core parsing & component detection |
-| Phase 2 | Not Started | - | Branch creation & commit generation |
-| Phase 3 | Not Started | - | CLI interface & UX |
-| Phase 4 | Not Started | - | Testing & documentation |
+| Phase 1 | Complete | - | Core parsing & component detection |
+| Phase 2 | Complete | - | Branch creation & commit generation |
+| Phase 3 | Complete | - | CLI interface & UX |
+| Phase 4 | Complete | - | Effect collection & global dry-run |
+| Phase 5 | Not Started | - | Structured dry-run output |
+| Phase 6 | Not Started | - | Testing & documentation |
 
 ## Phase Plans
 
-- [ ] [Phase 0: Decisions & ADRs](phase/00-decisions.md)
-- [ ] [Phase 1: Core Parsing & Component Detection](phase/01-core-parsing.md)
-- [ ] [Phase 2: Branch Creation & Commit Generation](phase/02-branch-operations.md)
-- [ ] [Phase 3: CLI Interface & User Experience](phase/03-cli-interface.md)
-- [ ] [Phase 4: Testing & Documentation](phase/04-testing-docs.md)
+- [x] [Phase 0: Decisions & ADRs](phase/00-decisions.md)
+- [x] [Phase 1: Core Parsing & Component Detection](phase/01-core-parsing.md)
+- [x] [Phase 2: Branch Creation & Commit Generation](phase/02-branch-operations.md)
+- [x] [Phase 3: CLI Interface & User Experience](phase/03-cli-interface.md)
+- [x] [Phase 4: Effect Collection & Global Dry-Run](phase/04-effect-collection.md)
+- [ ] [Phase 5: Structured Dry-Run Output](phase/05-structured-dry-run-output.md)
+- [ ] [Phase 6: Testing & Documentation](phase/06-testing-docs.md)
 
 ## Architecture
 

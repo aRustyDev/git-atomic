@@ -6,10 +6,12 @@ Core functionality for local-first atomic branch creation.
 
 ### Milestones
 
-- [ ] Phase 1: Core parsing & component detection
-- [ ] Phase 2: Branch creation & commit generation
-- [ ] Phase 3: CLI interface & UX
-- [ ] Phase 4: Testing & documentation
+- [x] Phase 1: Core parsing & component detection
+- [x] Phase 2: Branch creation & commit generation
+- [x] Phase 3: CLI interface & UX
+- [x] Phase 4: Effect collection & global dry-run
+- [ ] Phase 5: Structured dry-run output
+- [ ] Phase 6: Testing & documentation
 
 ### MVP Scope
 
