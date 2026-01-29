@@ -19,23 +19,25 @@ Core functionality for local-first atomic branch creation.
 - Atomic branch creation (`atomic/{component}`)
 - Conventional commit generation
 - Clear output with push commands
+- `.atomic.toml` configuration file (P0 — component globs, base branch, unmatched files handling)
+- Dry-run mode
 
 **Out of Scope (Post-MVP):**
 - GitHub PR integration
 - CI workflow components
-- Configuration file support
-- Custom component patterns
+- Custom component patterns (beyond glob)
+- Ignore patterns
 
 ---
 
 ## v0.2.0 (Minor)
 
-Configuration and customization.
+Configuration and customization extensions.
 
-- [ ] `.git-atomic.toml` configuration file
-- [ ] Custom component patterns
+- [ ] Custom component patterns (regex, path prefix)
 - [ ] Ignore patterns
-- [ ] Dry-run mode
+- [ ] Custom branch templates
+- [ ] Component-specific commit type overrides
 
 ---
 

@@ -17,6 +17,11 @@ Complete CLI with all commands, output formatting, and user-facing features.
 5. Verbosity levels
 6. CI mode with auto-push
 
+## Skills
+
+- `lang-rust-dev`
+- `lang-rust-library-dev`
+
 ## Dependencies
 
 - Phase 1: Core Parsing (configuration)
@@ -69,7 +74,7 @@ Complete CLI with all commands, output formatting, and user-facing features.
 ### 3.5 Output Formatting
 
 - [ ] Define output structs for each command
-- [ ] Human-readable formatter with colors (termcolor/owo-colors)
+- [ ] Human-readable formatter with colors (owo-colors)
 - [ ] JSON formatter with serde_json
 - [ ] Progress indicators for long operations
 - [ ] Summary statistics (files, branches, lines changed)

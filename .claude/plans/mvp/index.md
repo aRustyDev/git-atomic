@@ -14,6 +14,7 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 
 | Phase | Status | Issue | Description |
 |-------|--------|-------|-------------|
+| Phase 0 | Not Started | - | Decisions & ADRs |
 | Phase 1 | Not Started | - | Core parsing & component detection |
 | Phase 2 | Not Started | - | Branch creation & commit generation |
 | Phase 3 | Not Started | - | CLI interface & UX |
@@ -21,6 +22,7 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 
 ## Phase Plans
 
+- [ ] [Phase 0: Decisions & ADRs](phase/00-decisions.md)
 - [ ] [Phase 1: Core Parsing & Component Detection](phase/01-core-parsing.md)
 - [ ] [Phase 2: Branch Creation & Commit Generation](phase/02-branch-operations.md)
 - [ ] [Phase 3: CLI Interface & User Experience](phase/03-cli-interface.md)
@@ -41,7 +43,7 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 │    ├── BranchManager     - Create/update branches   │
 │    └── CommitGenerator   - Conventional commits     │
 ├─────────────────────────────────────────────────────┤
-│  Git Interface (git2-rs)                            │
+│  Git Interface (gix)                                 │
 │    └── Repository operations                        │
 └─────────────────────────────────────────────────────┘
 ```
@@ -87,8 +89,31 @@ sequenceDiagram
 
 ## Open Questions
 
-<!-- Track unresolved questions here -->
+All open questions resolved in Phase 0. See [phase/00-decisions.md](phase/00-decisions.md).
 
 ## GAP Review Notes
 
-<!-- Document gaps, areas for refinement, potential extensions -->
+**Review Date**: 2025-01-29
+
+### Gaps Found
+
+1. **No Phase 0 for decisions** — Open questions from requirements and phases had no resolution gate. Added Phase 0: Decisions & ADRs.
+2. **Missing skill directives** — Phase plans lacked `Skills` sections to guide agent tooling. Added to all phases.
+3. **ROADMAP/requirements scope conflict** — ROADMAP listed `.atomic.toml` config as post-MVP, but requirements have it as P0. Resolved: config is MVP scope.
+4. **ROADMAP listed dry-run as post-MVP** — Requirements and Phase 3 include it as P0. Resolved: dry-run is MVP scope.
+5. **MSRV mismatch** — Requirements said 1.75, but Cargo.toml uses `edition = "2024"` which requires 1.85+. Resolved: MSRV is 1.85+.
+6. **git-cliff `link_parsers` URL** — Pointed to `orhun/git-cliff` instead of `aRustyDev/git-atomic`. Fixed in requirements and Cargo.toml.
+7. **`reference/tests/` directory** — Contains archived Helm chart workflow material unrelated to git-atomic. Added NOTE.md explaining its status.
+8. **Architecture diagram said git2-rs** — Requirements confirm gix. Fixed in index.md.
+
+### Areas Refined
+
+- All 9 open questions (3 requirements, 3 Phase 1, 3 Phase 2) resolved with concrete decisions
+- 4 ADRs identified for authoring in Phase 0
+- Benchmark acceptance criteria added to Phase 4 for NFR-001/002
+- Color crate decision narrowed to owo-colors in Phase 3
+
+### Potential Extensions (Not Blocking)
+
+- Dependency additions (tracing, globset, serde_json, figment features) documented as Phase 1 implementation tasks, not plan changes
+- ADR template integration via `architecture-decision-records-dev` skill

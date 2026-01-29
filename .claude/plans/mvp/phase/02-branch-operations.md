@@ -15,6 +15,11 @@ Core atomization: create/update atomic branches and generate conventional commit
 3. Partial file application to branches
 4. Conventional commit message generation
 
+## Skills
+
+- `lang-rust-dev`
+- `lang-rust-memory-eng`
+
 ## Dependencies
 
 - Phase 1: Core Parsing (commit analysis, component matching)
@@ -129,11 +134,11 @@ Before proceeding to Phase 3:
 - [ ] Edge cases documented (empty components, no changes)
 - [ ] Code reviewed
 
-## Open Questions
+## Resolved Questions
 
-1. **Tree manipulation**: Use gix tree builder or worktree checkout?
-2. **Commit author**: Preserve source author or use configured?
-3. **Signature**: GPG sign atomic commits?
+1. **Tree manipulation** → **gix tree builder** — direct tree manipulation, no worktree checkout. See Phase 0.
+2. **Commit author** → **Preserve source author** — atomic commits retain original author; committer is current user.
+3. **GPG signing** → **Deferred to post-MVP** — no signing in v0.1.0.
 
 ## References
 

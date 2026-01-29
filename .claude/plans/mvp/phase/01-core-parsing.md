@@ -15,9 +15,15 @@ Foundation work: project setup, configuration loading, and commit analysis.
 3. Glob pattern matching for components
 4. Commit analysis (file changes extraction)
 
+## Skills
+
+- `lang-rust-dev`
+- `lang-rust-cargo-dev`
+- `lang-rust-errors-dev`
+
 ## Dependencies
 
-- None (first phase)
+- Phase 0: Decisions & ADRs
 
 ## Acceptance Criteria
 
@@ -109,11 +115,11 @@ Before proceeding to Phase 2:
 - [ ] Code reviewed
 - [ ] Documentation for config format exists
 
-## Open Questions
+## Resolved Questions
 
-1. **Glob library choice**: globset (fast, compiled) vs glob (simple)?
-2. **Overlap handling**: Error or first-match-wins?
-3. **Initial commit**: How to handle commits with no parent?
+1. **Glob library choice** → **globset** (fast, compiled pattern sets). See ADR-003.
+2. **Overlap handling** → **First-match-wins** in config order. See ADR-003.
+3. **Initial commit** → **Empty tree diff** — use git's empty tree SHA as parent tree.
 
 ## References
 

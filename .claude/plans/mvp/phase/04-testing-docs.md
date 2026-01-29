@@ -17,6 +17,13 @@ Comprehensive testing, documentation, and release preparation.
 5. Troubleshooting guide
 6. v0.1.0 release
 
+## Skills
+
+- `lang-rust-dev`
+- `lang-rust-docs-dev`
+- `lang-rust-benchmarking-eng`
+- `architecture-decision-records-dev`
+
 ## Dependencies
 
 - Phase 1: Core Parsing
@@ -114,6 +121,22 @@ Update `docs/src/`:
 | JSON output | | | ✓ |
 | CI mode | | | ✓ |
 | Error exit codes | | | ✓ |
+
+## Benchmark Acceptance Criteria
+
+Per NFR-001 and NFR-002:
+
+| Benchmark | Target | Measurement |
+|-----------|--------|-------------|
+| Single commit atomization | < 2 seconds | `cargo bench` with criterion |
+| 10-component split | < 10 seconds | `cargo bench` with criterion |
+| Memory usage (peak) | < 100 MB | Profiling via `lang-rust-benchmarking-eng` |
+
+Benchmarks must be automated and run in CI to detect regressions.
+
+## Note on `reference/tests/`
+
+The `reference/tests/` directory contains archived material from a prior Helm chart workflow design. It is not related to git-atomic MVP testing. See `reference/tests/NOTE.md`.
 
 ## Documentation Structure
 

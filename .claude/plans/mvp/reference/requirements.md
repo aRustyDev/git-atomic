@@ -212,7 +212,7 @@ git atomic --dry-run
 |----|-------------|
 | NFR-010 | Git 2.30+ |
 | NFR-011 | Linux (primary), macOS, Windows (best-effort) |
-| NFR-012 | Rust stable (MSRV: 1.75) |
+| NFR-012 | Rust stable (MSRV: 1.85+, edition 2024) |
 
 ### 4.3 Reliability
 
@@ -543,7 +543,7 @@ Hint: Use --force to overwrite, or manually reconcile the branch
 
 | Decision | Defer Until |
 |----------|-------------|
-| Workdir vs tree-manipulation for partial apply | Implementation spike |
+| ~~Workdir vs tree-manipulation for partial apply~~ | ~~Implementation spike~~ → **Resolved: gix tree builder** |
 | Content hash format | Post-MVP optimization |
 | Rebase strategy implementation | User feedback on fast-forward limitations |
 
@@ -611,38 +611,17 @@ Create a test fixture repository with:
 
 ## 13. Open Questions for MVP
 
-### OQ-MVP-001: Commit Message Strategy
+### OQ-MVP-001: Commit Message Strategy ✅ RESOLVED
 
-When atomizing, how do we generate the commit message?
+**Decision: Option 1** — Copy source commit message, add `(component)` scope. Simplest approach, preserves developer intent.
 
-**Options:**
-1. Copy source commit message, add `(component)` scope
-2. Generate from file analysis (e.g., "update values.yaml")
-3. Require message template in config
+### OQ-MVP-002: Multiple Commits to Same Component ✅ RESOLVED
 
-**Leaning:** Option 1 for simplicity.
+**Decision: Option 1** — One atomic commit per source commit. Preserves commit granularity.
 
-### OQ-MVP-002: Multiple Commits to Same Component
+### OQ-MVP-003: Atomic Branch Divergence Definition ✅ RESOLVED
 
-When a range contains multiple commits touching the same component:
-
-**Options:**
-1. Create one atomic commit per source commit
-2. Squash into single atomic commit
-3. Error and require manual handling
-
-**Leaning:** Option 1 (preserves commit granularity).
-
-### OQ-MVP-003: Atomic Branch Divergence Definition
-
-What exactly constitutes "diverged"?
-
-**Options:**
-1. Atomic branch tip is not an ancestor of proposed new commit
-2. Atomic branch base is not the current main HEAD
-3. Content hash mismatch (requires manifest)
-
-**Leaning:** Option 1 for MVP (simple reachability check).
+**Decision: Option 1** — Reachability check (atomic branch tip is not an ancestor of proposed new commit). Simple, correct for MVP.
 
 ---
 
