@@ -26,7 +26,13 @@ pub enum Effect {
         branches: Vec<String>,
     },
     /// Write a file to disk.
-    WriteFile { path: PathBuf, content: String },
+    WriteFile {
+        path: PathBuf,
+        content: String,
+        /// Structured representation for JSON output. When present, JSON
+        /// dry-run uses this instead of the raw content string.
+        structured: Option<serde_json::Value>,
+    },
 }
 
 /// Execute or preview a list of effects.
@@ -107,7 +113,7 @@ fn run_effect(repo: Option<&gix::Repository>, effect: &Effect) -> Result<(), Err
                 )));
             }
         }
-        Effect::WriteFile { path, content } => {
+        Effect::WriteFile { path, content, .. } => {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).map_err(|e| {
                     Error::General(format!("failed to create directory {}: {e}", parent.display()))

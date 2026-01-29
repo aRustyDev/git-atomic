@@ -19,7 +19,7 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 | Phase 2 | Complete | - | Branch creation & commit generation |
 | Phase 3 | Complete | - | CLI interface & UX |
 | Phase 4 | Complete | - | Effect collection & global dry-run |
-| Phase 5 | Not Started | - | Structured dry-run output |
+| Phase 5 | Complete | - | Structured dry-run output |
 | Phase 6 | Not Started | - | Testing & documentation |
 
 ## Phase Plans
@@ -29,7 +29,7 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 - [x] [Phase 2: Branch Creation & Commit Generation](phase/02-branch-operations.md)
 - [x] [Phase 3: CLI Interface & User Experience](phase/03-cli-interface.md)
 - [x] [Phase 4: Effect Collection & Global Dry-Run](phase/04-effect-collection.md)
-- [ ] [Phase 5: Structured Dry-Run Output](phase/05-structured-dry-run-output.md)
+- [x] [Phase 5: Structured Dry-Run Output](phase/05-structured-dry-run-output.md)
 - [ ] [Phase 6: Testing & Documentation](phase/06-testing-docs.md)
 
 ## Architecture

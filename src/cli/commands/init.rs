@@ -25,9 +25,11 @@ pub fn run(config_path: &Path, dry_run: bool, printer: &Printer) -> Result<(), E
         .map_err(|e| Error::General(format!("failed to serialize config: {e}")))?;
 
     let content = format!("{HEADER}{toml_body}");
+    let structured = serde_json::to_value(&sample).ok();
     let effects = vec![Effect::WriteFile {
         path: config_path.to_path_buf(),
         content,
+        structured,
     }];
 
     effect::execute(None, &effects, dry_run, printer)?;

@@ -10,7 +10,7 @@ Core functionality for local-first atomic branch creation.
 - [x] Phase 2: Branch creation & commit generation
 - [x] Phase 3: CLI interface & UX
 - [x] Phase 4: Effect collection & global dry-run
-- [ ] Phase 5: Structured dry-run output
+- [x] Phase 5: Structured dry-run output
 - [ ] Phase 6: Testing & documentation
 
 ### MVP Scope

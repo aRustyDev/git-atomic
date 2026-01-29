@@ -182,12 +182,15 @@ impl Printer {
                             "branches": branches,
                         })
                     }
-                    Effect::WriteFile { path, content } => {
+                    Effect::WriteFile { path, content, structured } => {
+                        let content_value = structured
+                            .clone()
+                            .unwrap_or_else(|| serde_json::Value::String(content.clone()));
                         serde_json::json!({
                             "effect": "write_file",
                             "dry_run": true,
                             "path": path.display().to_string(),
-                            "content": content,
+                            "content": content_value,
                         })
                     }
                 };
@@ -221,7 +224,7 @@ impl Printer {
                             remote.bold()
                         );
                     }
-                    Effect::WriteFile { path, content } => {
+                    Effect::WriteFile { path, content, .. } => {
                         let _ = writeln!(
                             out,
                             "  {} would create {}",
