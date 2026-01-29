@@ -14,7 +14,7 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 
 | Phase | Status | Issue | Description |
 |-------|--------|-------|-------------|
-| Phase 0 | Not Started | - | Decisions & ADRs |
+| Phase 0 | Complete | - | Decisions & ADRs |
 | Phase 1 | Not Started | - | Core parsing & component detection |
 | Phase 2 | Not Started | - | Branch creation & commit generation |
 | Phase 3 | Not Started | - | CLI interface & UX |

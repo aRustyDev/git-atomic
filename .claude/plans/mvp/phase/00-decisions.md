@@ -1,6 +1,6 @@
 # Phase 0: Decisions & ADRs
 
-**Status**: Not Started
+**Status**: Complete
 **Issue**: TBD
 **Parent**: [MVP Plan](../index.md)
 
@@ -74,10 +74,10 @@ Resolve all open questions from the requirements and phase plans. Produce ADRs f
 
 | ADR | Title | Status |
 |-----|-------|--------|
-| ADR-001 | Adopt local-first design | To Author |
-| ADR-002 | Use gix for git operations | To Author |
-| ADR-003 | Use globset with first-match-wins | To Author |
-| ADR-004 | Use thiserror for error hierarchy | To Author |
+| ADR-001 | Adopt local-first design | Accepted |
+| ADR-002 | Use gix for git operations | Accepted |
+| ADR-003 | Use globset with first-match-wins | Accepted |
+| ADR-004 | Use thiserror for error hierarchy | Accepted |
 
 Each ADR follows the format in `docs/src/adr/` per project conventions.
 
