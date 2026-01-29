@@ -8,7 +8,7 @@ use std::path::PathBuf;
 ///
 /// Splits a multi-component commit into isolated per-component branches,
 /// each containing only the files that belong to that component.
-/// Run without a subcommand to atomize HEAD with default settings.
+/// Run without a subcommand to split HEAD with default settings.
 #[derive(Debug, Parser)]
 #[command(
     name = "git-atomic",
@@ -45,7 +45,7 @@ pub struct Cli {
 #[derive(Debug, Subcommand)]
 pub enum Command {
     /// Split a commit into per-component branches [default when omitted].
-    Atomize(AtomizeArgs),
+    Commit(CommitArgs),
 
     /// Show each component's branch state relative to the base branch.
     Status(StatusArgs),
@@ -58,12 +58,12 @@ pub enum Command {
 }
 
 #[derive(Debug, Parser)]
-pub struct AtomizeArgs {
-    /// Git ref to atomize (commit SHA, branch, or tag).
-    #[arg(long, default_value = "HEAD")]
-    pub commit: String,
+pub struct CommitArgs {
+    /// Git ref to split (commit SHA, branch, or tag).
+    #[arg(long = "ref", default_value = "HEAD")]
+    pub source_ref: String,
 
-    /// Atomize every commit in a range (e.g. main..feature).
+    /// Split every commit in a range (e.g. main..feature).
     #[arg(long, value_name = "START..END")]
     pub range: Option<String>,
 
@@ -71,11 +71,11 @@ pub struct AtomizeArgs {
     #[arg(long)]
     pub force: bool,
 
-    /// Atomize and push in one step; exit non-zero on any failure.
+    /// Split and push in one step; exit non-zero on any failure.
     #[arg(long)]
     pub ci_mode: bool,
 
-    /// Push component branches to the remote after atomizing.
+    /// Push component branches to the remote after splitting.
     #[arg(long)]
     pub push: bool,
 

@@ -1,6 +1,6 @@
 use clap::Parser;
 use git_atomic::cli::output::Printer;
-use git_atomic::cli::{AtomizeArgs, Cli, Command};
+use git_atomic::cli::{Cli, Command, CommitArgs};
 use std::process::ExitCode;
 
 
@@ -9,8 +9,8 @@ fn main() -> ExitCode {
     let printer = Printer::new(cli.json, cli.quiet, cli.verbose);
 
     let result = match cli.command {
-        Some(Command::Atomize(ref args)) => {
-            git_atomic::cli::commands::atomize::run(args, &cli.config, cli.dry_run, &printer)
+        Some(Command::Commit(ref args)) => {
+            git_atomic::cli::commands::commit::run(args, &cli.config, cli.dry_run, &printer)
         }
         Some(Command::Status(ref args)) => {
             git_atomic::cli::commands::status::run(args, &cli.config, &printer)
@@ -22,15 +22,15 @@ fn main() -> ExitCode {
             git_atomic::cli::commands::init::run(&cli.config, cli.dry_run, &printer)
         }
         None => {
-            let args = AtomizeArgs {
-                commit: "HEAD".into(),
+            let args = CommitArgs {
+                source_ref: "HEAD".into(),
                 range: None,
                 force: false,
                 ci_mode: false,
                 push: false,
                 remote: "origin".into(),
             };
-            git_atomic::cli::commands::atomize::run(&args, &cli.config, cli.dry_run, &printer)
+            git_atomic::cli::commands::commit::run(&args, &cli.config, cli.dry_run, &printer)
         }
     };
 

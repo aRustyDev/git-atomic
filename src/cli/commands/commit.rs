@@ -1,11 +1,11 @@
 use crate::cli::output::Printer;
-use crate::cli::AtomizeArgs;
+use crate::cli::CommitArgs;
 use crate::core::effect::{self, Effect};
 use crate::core::{ComponentMatcher, Error};
 use std::path::Path;
 
 pub fn run(
-    args: &AtomizeArgs,
+    args: &CommitArgs,
     config_path: &Path,
     dry_run: bool,
     printer: &Printer,
@@ -26,7 +26,7 @@ pub fn run(
     let matcher = ComponentMatcher::from_config(&cfg)?;
 
     let (results, mut effects) =
-        crate::git::atomize::plan_atomize(&repo, &cfg, &matcher, &args.commit, args.force)?;
+        crate::git::atomize::plan_atomize(&repo, &cfg, &matcher, &args.source_ref, args.force)?;
 
     if (args.push || args.ci_mode) && !results.is_empty() {
         let branches: Vec<String> = results.iter().map(|r| r.branch.clone()).collect();
@@ -37,7 +37,7 @@ pub fn run(
     }
 
     effect::execute(Some(&repo), &effects, dry_run, printer)?;
-    printer.print_atomize_results(&results, dry_run);
+    printer.print_commit_results(&results, dry_run);
 
     Ok(())
 }

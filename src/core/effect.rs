@@ -74,7 +74,7 @@ fn run_effect(repo: Option<&gix::Repository>, effect: &Effect) -> Result<(), Err
                         log: gix::refs::transaction::LogChange {
                             mode: gix::refs::transaction::RefLog::AndReference,
                             force_create_reflog: false,
-                            message: "git-atomic: atomize".into(),
+                            message: "git-atomic: commit".into(),
                         },
                         expected,
                         new: target,

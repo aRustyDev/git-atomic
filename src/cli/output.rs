@@ -30,7 +30,7 @@ impl Printer {
         Self { mode, verbosity }
     }
 
-    pub fn print_atomize_results(&self, results: &[AtomicResult], dry_run: bool) {
+    pub fn print_commit_results(&self, results: &[AtomicResult], dry_run: bool) {
         match self.mode {
             OutputMode::Quiet => {}
             OutputMode::Json => {
