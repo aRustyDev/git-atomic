@@ -3,7 +3,7 @@ id: 8b2f4e71-a3d9-4c82-b517-6d1e9f3a8c05
 project:
   id: b0ad8e03-e785-4d81-a998-8c8341976588
 title: "ADR-006: Layered configuration with git config support"
-status: proposed
+status: accepted
 tags: [adr, configuration, git-config]
 related:
   depends-on:
@@ -14,7 +14,7 @@ related:
 
 ## Status
 
-Proposed
+Accepted
 
 ## Date
 

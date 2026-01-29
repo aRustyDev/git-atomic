@@ -4,14 +4,17 @@ branch_template = "atomic/{component}"
 unmatched_files = "warn"
 default_commit_type = "feat"
 
-[components.frontend]
+[[components]]
+name = "frontend"
 globs = ["src/ui/**", "src/components/**"]
 commit_type = "feat"
 branch = "deploy/frontend"
 
-[components.backend]
+[[components]]
+name = "backend"
 globs = ["src/api/**", "src/db/**"]
 commit_type = "fix"
 
-[components.docs]
+[[components]]
+name = "docs"
 globs = ["docs/**", "*.md"]

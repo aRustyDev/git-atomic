@@ -89,4 +89,8 @@ pub struct StatusArgs {
     /// Git ref whose changed files to inspect.
     #[arg(long, default_value = "HEAD")]
     pub commit: String,
+
+    /// Suppress configuration display (show only branch state).
+    #[arg(long)]
+    pub no_config: bool,
 }

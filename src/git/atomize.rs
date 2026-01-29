@@ -76,7 +76,7 @@ pub fn plan_atomize(
     let mut results: Vec<AtomicResult> = Vec::new();
 
     for (component_name, component_files) in &grouped {
-        let component_config = config.components.get(component_name as &str);
+        let component_config = config.components.iter().find(|c| c.name == *component_name);
         let branch_override = component_config.and_then(|c| c.branch.as_deref());
         let ref_name = branch_mgr.branch_ref_name(component_name, branch_override);
 
@@ -199,10 +199,12 @@ mod tests {
 base_branch = "main"
 unmatched_files = "ignore"
 
-[components.frontend]
+[[components]]
+name = "frontend"
 globs = ["src/ui/**"]
 
-[components.backend]
+[[components]]
+name = "backend"
 globs = ["src/api/**"]
 commit_type = "fix"
 "#;

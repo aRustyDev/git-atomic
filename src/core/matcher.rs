@@ -5,7 +5,7 @@ use std::path::Path;
 
 /// Maps file paths to components using first-match-wins (ADR-003).
 ///
-/// Each glob is tagged with its component index (position in the IndexMap).
+/// Each glob is tagged with its component index (position in the Vec).
 /// When `GlobSet` returns multiple matches, the lowest index wins.
 pub struct ComponentMatcher {
     glob_set: GlobSet,
@@ -22,16 +22,16 @@ impl ComponentMatcher {
         let mut glob_owners = Vec::new();
         let mut component_names = Vec::new();
 
-        for (idx, (name, component)) in config.components.iter().enumerate() {
-            component_names.push(name.clone());
+        for (idx, component) in config.components.iter().enumerate() {
+            component_names.push(component.name.clone());
             for pattern in &component.globs {
                 let glob = Glob::new(pattern).map_err(|e| ConfigError::InvalidGlob {
-                    component: name.clone(),
+                    component: component.name.clone(),
                     pattern: pattern.clone(),
                     reason: e.to_string(),
                 })?;
                 builder.add(glob);
-                glob_owners.push((idx, name.clone()));
+                glob_owners.push((idx, component.name.clone()));
             }
         }
 
@@ -95,23 +95,19 @@ impl ComponentMatcher {
 mod tests {
     use super::*;
     use crate::config::{Component, Config, Settings};
-    use indexmap::IndexMap;
 
     fn make_config(components: Vec<(&str, Vec<&str>)>) -> Config {
-        let mut map = IndexMap::new();
-        for (name, globs) in components {
-            map.insert(
-                name.to_string(),
-                Component {
+        Config {
+            settings: Settings::default(),
+            components: components
+                .into_iter()
+                .map(|(name, globs)| Component {
+                    name: name.to_string(),
                     globs: globs.into_iter().map(String::from).collect(),
                     commit_type: None,
                     branch: None,
-                },
-            );
-        }
-        Config {
-            settings: Settings::default(),
-            components: map,
+                })
+                .collect(),
         }
     }
 

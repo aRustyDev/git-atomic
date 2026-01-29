@@ -1,3 +1,5 @@
+use crate::config::layered::ConfigWarning;
+use crate::config::ResolvedConfig;
 use crate::core::effect::Effect;
 use crate::git::atomize::AtomicResult;
 use crate::git::branch::BranchState;
@@ -141,6 +143,21 @@ impl Printer {
         }
     }
 
+    pub fn print_error(&self, err: &crate::core::Error) {
+        match self.mode {
+            OutputMode::Quiet => {}
+            OutputMode::Json => {
+                println!(
+                    "{}",
+                    serde_json::json!({"error": err.to_string()})
+                );
+            }
+            OutputMode::Human => {
+                eprintln!("{} {}", "✗".red(), err);
+            }
+        }
+    }
+
     pub fn print_validate_error(&self, err: &crate::core::Error) {
         match self.mode {
             OutputMode::Quiet => {}
@@ -152,6 +169,85 @@ impl Printer {
             }
             OutputMode::Human => {
                 eprintln!("{} {}", "✗".red(), err);
+            }
+        }
+    }
+
+    pub fn print_config_provenance(&self, resolved: &ResolvedConfig) {
+        match self.mode {
+            OutputMode::Quiet => {}
+            OutputMode::Json => {
+                let config = serde_json::json!({
+                    "config": {
+                        "base_branch": {
+                            "value": resolved.base_branch.value,
+                            "source": resolved.base_branch.source.label(),
+                        },
+                        "branch_template": {
+                            "value": resolved.branch_template.value,
+                            "source": resolved.branch_template.source.label(),
+                        },
+                        "unmatched_files": {
+                            "value": resolved.unmatched_files.value.to_string(),
+                            "source": resolved.unmatched_files.source.label(),
+                        },
+                        "default_commit_type": {
+                            "value": resolved.default_commit_type.value,
+                            "source": resolved.default_commit_type.source.label(),
+                        },
+                    }
+                });
+                println!("{}", serde_json::to_string_pretty(&config).unwrap());
+            }
+            OutputMode::Human => {
+                let mut out = io::stdout().lock();
+                let _ = writeln!(out, "{}", "Settings:".bold());
+                let _ = writeln!(
+                    out,
+                    "  {:<20} = {:<30} ({})",
+                    "base_branch",
+                    resolved.base_branch.value,
+                    resolved.base_branch.source.label().dimmed()
+                );
+                let _ = writeln!(
+                    out,
+                    "  {:<20} = {:<30} ({})",
+                    "branch_template",
+                    resolved.branch_template.value,
+                    resolved.branch_template.source.label().dimmed()
+                );
+                let _ = writeln!(
+                    out,
+                    "  {:<20} = {:<30} ({})",
+                    "unmatched_files",
+                    resolved.unmatched_files.value.to_string(),
+                    resolved.unmatched_files.source.label().dimmed()
+                );
+                if let Some(ref ct) = resolved.default_commit_type.value {
+                    let _ = writeln!(
+                        out,
+                        "  {:<20} = {:<30} ({})",
+                        "default_commit_type",
+                        ct,
+                        resolved.default_commit_type.source.label().dimmed()
+                    );
+                }
+                let _ = writeln!(out);
+            }
+        }
+    }
+
+    pub fn print_config_warning(&self, warning: &ConfigWarning) {
+        match self.mode {
+            OutputMode::Quiet => {}
+            OutputMode::Json => {
+                println!(
+                    "{}",
+                    serde_json::json!({"warning": warning.message})
+                );
+            }
+            OutputMode::Human => {
+                eprintln!("{} {}", "⚠".yellow(), warning.message);
             }
         }
     }

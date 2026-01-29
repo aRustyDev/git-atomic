@@ -48,10 +48,9 @@ fn sample_config_round_trips() {
     assert_eq!(parsed.settings.base_branch, sample.settings.base_branch);
     assert_eq!(parsed.settings.branch_template, sample.settings.branch_template);
     assert_eq!(parsed.components.len(), sample.components.len());
-    for (name, comp) in &sample.components {
-        let p = parsed.components.get(name).unwrap_or_else(|| {
-            panic!("component {name} missing after round-trip")
-        });
+    for (i, comp) in sample.components.iter().enumerate() {
+        let p = &parsed.components[i];
+        assert_eq!(p.name, comp.name);
         assert_eq!(p.globs, comp.globs);
         assert_eq!(p.commit_type, comp.commit_type);
         assert_eq!(p.branch, comp.branch);

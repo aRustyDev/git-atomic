@@ -1,14 +1,16 @@
+pub mod git_provider;
+pub mod layered;
+pub mod source;
 pub mod types;
 
+pub use layered::{load_layered_config, ResolvedConfig};
+pub use source::{ConfigSource, Sourced};
 pub use types::{Component, Config, Settings, UnmatchedPolicy};
 
 use crate::core::ConfigError;
 use std::path::Path;
 
 /// Load configuration from `.atomic.toml` (or a custom path).
-///
-/// Uses the `toml` crate directly (not figment) to preserve TOML insertion
-/// order in `IndexMap`, which is critical for first-match-wins (ADR-003).
 pub fn load_config(path: &Path) -> Result<Config, ConfigError> {
     if !path.exists() {
         return Err(ConfigError::NotFound {
@@ -25,12 +27,19 @@ pub fn load_config(path: &Path) -> Result<Config, ConfigError> {
     Ok(config)
 }
 
-/// Validate that all glob patterns compile.
+/// Validate that all glob patterns compile and component names are unique.
 fn validate_config(config: &Config) -> Result<(), ConfigError> {
-    for (name, component) in &config.components {
+    // Check component name uniqueness
+    let mut seen = std::collections::HashSet::new();
+    for component in &config.components {
+        if !seen.insert(&component.name) {
+            return Err(ConfigError::Invalid {
+                reason: format!("duplicate component name: {:?}", component.name),
+            });
+        }
         for pattern in &component.globs {
             globset::Glob::new(pattern).map_err(|e| ConfigError::InvalidGlob {
-                component: name.clone(),
+                component: component.name.clone(),
                 pattern: pattern.clone(),
                 reason: e.to_string(),
             })?;
@@ -60,10 +69,12 @@ mod tests {
 [settings]
 base_branch = "develop"
 
-[components.frontend]
+[[components]]
+name = "frontend"
 globs = ["src/ui/**"]
 
-[components.backend]
+[[components]]
+name = "backend"
 globs = ["src/api/**", "src/db/**"]
 commit_type = "fix"
 "#,
@@ -74,10 +85,9 @@ commit_type = "fix"
         assert_eq!(cfg.settings.unmatched_files, UnmatchedPolicy::Error);
         assert_eq!(cfg.components.len(), 2);
 
-        // Verify insertion order is preserved (IndexMap).
-        let keys: Vec<_> = cfg.components.keys().cloned().collect::<Vec<_>>();
-        assert_eq!(keys[0], "frontend");
-        assert_eq!(keys[1], "backend");
+        // Verify document order is preserved.
+        assert_eq!(cfg.components[0].name, "frontend");
+        assert_eq!(cfg.components[1].name, "backend");
     }
 
     #[test]
@@ -86,7 +96,8 @@ commit_type = "fix"
         let path = write_toml(
             dir.path(),
             r#"
-[components.app]
+[[components]]
+name = "app"
 globs = ["**"]
 "#,
         );
@@ -103,7 +114,8 @@ globs = ["**"]
         let path = write_toml(
             dir.path(),
             r#"
-[components.bad]
+[[components]]
+name = "bad"
 globs = ["[invalid"]
 "#,
         );
@@ -116,5 +128,25 @@ globs = ["[invalid"]
     fn missing_config_file() {
         let err = load_config(Path::new("/nonexistent/.atomic.toml")).unwrap_err();
         assert!(matches!(err, ConfigError::NotFound { .. }));
+    }
+
+    #[test]
+    fn duplicate_component_names_rejected() {
+        let dir = tempfile::tempdir().unwrap();
+        let path = write_toml(
+            dir.path(),
+            r#"
+[[components]]
+name = "app"
+globs = ["src/**"]
+
+[[components]]
+name = "app"
+globs = ["lib/**"]
+"#,
+        );
+
+        let err = load_config(&path).unwrap_err();
+        assert!(matches!(err, ConfigError::Invalid { .. }));
     }
 }

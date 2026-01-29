@@ -1,6 +1,7 @@
-use indexmap::IndexMap;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
+use std::fmt;
+use std::str::FromStr;
 
 /// Root configuration loaded from `.atomic.toml`.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
@@ -8,10 +9,11 @@ pub struct Config {
     #[serde(default)]
     pub settings: Settings,
 
-    /// Ordered map of component name → definition.
-    /// Insertion order determines match priority (first-match-wins per ADR-003).
-    #[schemars(with = "std::collections::HashMap<String, Component>")]
-    pub components: IndexMap<String, Component>,
+    /// Ordered list of component definitions.
+    /// Order determines match priority (first-match-wins per ADR-003).
+    /// Order guaranteed by TOML array-of-tables spec (ADR-007).
+    #[serde(default)]
+    pub components: Vec<Component>,
 }
 
 /// Global settings with defaults.
@@ -46,9 +48,37 @@ pub enum UnmatchedPolicy {
     Ignore,
 }
 
+impl FromStr for UnmatchedPolicy {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s.to_lowercase().as_str() {
+            "error" => Ok(UnmatchedPolicy::Error),
+            "warn" => Ok(UnmatchedPolicy::Warn),
+            "ignore" => Ok(UnmatchedPolicy::Ignore),
+            other => Err(format!(
+                "invalid unmatched_files policy: {other:?} (expected \"error\", \"warn\", or \"ignore\")"
+            )),
+        }
+    }
+}
+
+impl fmt::Display for UnmatchedPolicy {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            UnmatchedPolicy::Error => f.write_str("error"),
+            UnmatchedPolicy::Warn => f.write_str("warn"),
+            UnmatchedPolicy::Ignore => f.write_str("ignore"),
+        }
+    }
+}
+
 /// A single component definition.
 #[derive(Debug, Clone, Serialize, Deserialize, JsonSchema)]
 pub struct Component {
+    /// Component name (previously the map key in `[components.<name>]`).
+    pub name: String,
+
     /// Glob patterns that claim files for this component.
     pub globs: Vec<String>,
 
@@ -82,26 +112,42 @@ impl Config {
     /// Build a sample config with default settings and example components.
     /// Used by `init` to generate `.atomic.toml` from the real types.
     pub fn sample() -> Self {
-        let mut components = IndexMap::new();
-        components.insert(
-            "frontend".into(),
-            Component {
-                globs: vec!["src/ui/**".into(), "src/components/**".into()],
-                commit_type: None,
-                branch: None,
-            },
-        );
-        components.insert(
-            "backend".into(),
-            Component {
-                globs: vec!["src/api/**".into(), "src/db/**".into()],
-                commit_type: Some("fix".into()),
-                branch: None,
-            },
-        );
         Self {
             settings: Settings::default(),
-            components,
+            components: vec![
+                Component {
+                    name: "frontend".into(),
+                    globs: vec!["src/ui/**".into(), "src/components/**".into()],
+                    commit_type: None,
+                    branch: None,
+                },
+                Component {
+                    name: "backend".into(),
+                    globs: vec!["src/api/**".into(), "src/db/**".into()],
+                    commit_type: Some("fix".into()),
+                    branch: None,
+                },
+            ],
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn unmatched_policy_from_str() {
+        assert_eq!(UnmatchedPolicy::from_str("error").unwrap(), UnmatchedPolicy::Error);
+        assert_eq!(UnmatchedPolicy::from_str("WARN").unwrap(), UnmatchedPolicy::Warn);
+        assert_eq!(UnmatchedPolicy::from_str("Ignore").unwrap(), UnmatchedPolicy::Ignore);
+        assert!(UnmatchedPolicy::from_str("invalid").is_err());
+    }
+
+    #[test]
+    fn unmatched_policy_display() {
+        assert_eq!(UnmatchedPolicy::Error.to_string(), "error");
+        assert_eq!(UnmatchedPolicy::Warn.to_string(), "warn");
+        assert_eq!(UnmatchedPolicy::Ignore.to_string(), "ignore");
     }
 }

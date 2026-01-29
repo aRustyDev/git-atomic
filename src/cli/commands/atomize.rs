@@ -10,10 +10,20 @@ pub fn run(
     dry_run: bool,
     printer: &Printer,
 ) -> Result<(), Error> {
-    let cfg = crate::config::load_config(config_path)?;
-    let matcher = ComponentMatcher::from_config(&cfg)?;
     let repo =
         crate::git::open_repo(&std::env::current_dir().map_err(|e| Error::General(e.to_string()))?)?;
+
+    let resolved = crate::config::load_layered_config(Some(&repo), config_path)?;
+
+    if resolved.components.is_empty() {
+        return Err(Error::General(
+            "No components defined. Create .atomic.toml with [[components]] or run git-atomic init."
+                .into(),
+        ));
+    }
+
+    let cfg = resolved.to_config();
+    let matcher = ComponentMatcher::from_config(&cfg)?;
 
     let (results, mut effects) =
         crate::git::atomize::plan_atomize(&repo, &cfg, &matcher, &args.commit, args.force)?;

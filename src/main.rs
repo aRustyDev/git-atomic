@@ -3,11 +3,12 @@ use git_atomic::cli::output::Printer;
 use git_atomic::cli::{AtomizeArgs, Cli, Command};
 use std::process::ExitCode;
 
-fn run() -> Result<(), git_atomic::core::Error> {
+
+fn main() -> ExitCode {
     let cli = Cli::parse();
     let printer = Printer::new(cli.json, cli.quiet, cli.verbose);
 
-    match cli.command {
+    let result = match cli.command {
         Some(Command::Atomize(ref args)) => {
             git_atomic::cli::commands::atomize::run(args, &cli.config, cli.dry_run, &printer)
         }
@@ -31,14 +32,12 @@ fn run() -> Result<(), git_atomic::core::Error> {
             };
             git_atomic::cli::commands::atomize::run(&args, &cli.config, cli.dry_run, &printer)
         }
-    }
-}
+    };
 
-fn main() -> ExitCode {
-    match run() {
+    match result {
         Ok(()) => ExitCode::SUCCESS,
         Err(e) => {
-            eprintln!("error: {e}");
+            printer.print_error(&e);
             e.exit_code()
         }
     }
