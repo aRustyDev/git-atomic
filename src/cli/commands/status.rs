@@ -28,7 +28,7 @@ pub fn run(args: &StatusArgs, config_path: &Path, printer: &Printer) -> Result<(
     let cfg = resolved.to_config();
     let matcher = ComponentMatcher::from_config(&cfg)?;
 
-    let source_id = crate::git::resolve_commit(&repo, &args.commit)?;
+    let source_id = crate::git::resolve_commit(&repo, &args.source_ref)?;
     let files = crate::git::changed_files(&repo, source_id)?;
     let path_refs: Vec<&Path> = files.iter().map(|p| p.as_path()).collect();
     let (grouped, _) = matcher.group_files(&path_refs);

@@ -24,7 +24,6 @@ fn main() -> ExitCode {
         None => {
             let args = CommitArgs {
                 source_ref: "HEAD".into(),
-                range: None,
                 force: false,
                 ci_mode: false,
                 push: false,

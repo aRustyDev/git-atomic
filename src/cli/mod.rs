@@ -59,13 +59,9 @@ pub enum Command {
 
 #[derive(Debug, Parser)]
 pub struct CommitArgs {
-    /// Git ref to split (commit SHA, branch, or tag).
-    #[arg(long = "ref", default_value = "HEAD")]
+    /// Git ref or range to split (e.g. HEAD, main..feature).
+    #[arg(default_value = "HEAD")]
     pub source_ref: String,
-
-    /// Split every commit in a range (e.g. main..feature).
-    #[arg(long, value_name = "START..END")]
-    pub range: Option<String>,
 
     /// Overwrite branches that have diverged from the base branch.
     #[arg(long)]
@@ -87,8 +83,8 @@ pub struct CommitArgs {
 #[derive(Debug, Parser)]
 pub struct StatusArgs {
     /// Git ref whose changed files to inspect.
-    #[arg(long, default_value = "HEAD")]
-    pub commit: String,
+    #[arg(long = "ref", default_value = "HEAD")]
+    pub source_ref: String,
 
     /// Suppress configuration display (show only branch state).
     #[arg(long)]
