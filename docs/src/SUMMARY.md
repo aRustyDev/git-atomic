@@ -16,6 +16,7 @@
 - [ADR-003: Use globset with first-match-wins](./adr/adr-003-use-globset-with-first-match-wins.md)
 - [ADR-004: Use thiserror for error hierarchy](./adr/adr-004-use-thiserror-for-error-hierarchy.md)
 - [ADR-005: Use effect collection for side effects](./adr/adr-005-use-effect-collection-for-side-effects.md)
+- [ADR-006: Layered configuration with git config](./adr/adr-006-layered-config-with-git-config.md)
 
 ---
 

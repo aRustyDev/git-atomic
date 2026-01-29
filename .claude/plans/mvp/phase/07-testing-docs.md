@@ -1,4 +1,4 @@
-# Phase 6: Testing & Documentation
+# Phase 7: Testing & Documentation
 
 **Status**: Not Started
 **Issue**: TBD
@@ -31,6 +31,7 @@ Comprehensive testing, documentation, and release preparation.
 - Phase 3: CLI Interface
 - Phase 4: Effect Collection
 - Phase 5: Structured Dry-Run Output
+- Phase 6: Git Config Layered Configuration
 
 ## Acceptance Criteria
 

@@ -20,7 +20,8 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 | Phase 3 | Complete | - | CLI interface & UX |
 | Phase 4 | Complete | - | Effect collection & global dry-run |
 | Phase 5 | Complete | - | Structured dry-run output |
-| Phase 6 | Not Started | - | Testing & documentation |
+| Phase 6 | Not Started | - | Git config layered configuration |
+| Phase 7 | Not Started | - | Testing & documentation |
 
 ## Phase Plans
 
@@ -30,7 +31,8 @@ See [reference/requirements.md](reference/requirements.md) for full requirements
 - [x] [Phase 3: CLI Interface & User Experience](phase/03-cli-interface.md)
 - [x] [Phase 4: Effect Collection & Global Dry-Run](phase/04-effect-collection.md)
 - [x] [Phase 5: Structured Dry-Run Output](phase/05-structured-dry-run-output.md)
-- [ ] [Phase 6: Testing & Documentation](phase/06-testing-docs.md)
+- [ ] [Phase 6: Git Config Layered Configuration](phase/06-git-config-layered.md)
+- [ ] [Phase 7: Testing & Documentation](phase/07-testing-docs.md)
 
 ## Architecture
 
