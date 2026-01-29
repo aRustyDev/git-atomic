@@ -17,6 +17,7 @@
 - [ADR-004: Use thiserror for error hierarchy](./adr/adr-004-use-thiserror-for-error-hierarchy.md)
 - [ADR-005: Use effect collection for side effects](./adr/adr-005-use-effect-collection-for-side-effects.md)
 - [ADR-006: Layered configuration with git config](./adr/adr-006-layered-config-with-git-config.md)
+- [ADR-007: Use TOML array of tables for components](./adr/adr-007-use-toml-array-of-tables-for-components.md)
 
 ---
 

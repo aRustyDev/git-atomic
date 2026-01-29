@@ -76,7 +76,7 @@ Drop `.atomic.toml` and move everything to git config.
 
 ## Decision
 
-Use direct layered resolution with the following priority chain:
+Use figment-based layered resolution with a custom git config provider and the following priority chain:
 
 ```
 CLI args > ENV > .atomic.toml > git config > defaults
@@ -90,10 +90,12 @@ CLI args > ENV > .atomic.toml > git config > defaults
 
 ### Scope Boundaries
 
-Only `[settings]` keys are supported in git config and ENV. Component definitions (`[components.*]`) remain `.atomic.toml`-only because:
-1. Components require ordered maps (first-match-wins per ADR-003)
-2. Components use array values (glob patterns)
-3. Git config's flat key-value format cannot faithfully represent this structure
+Only `[settings]` keys are supported in git config and ENV. Component definitions (`[[components]]`) remain `.atomic.toml`-only because:
+1. Components use array values (glob patterns)
+2. Git config's flat key-value format cannot faithfully represent this structure
+3. Components are team-shared definitions that belong in version control
+
+Note: Components use TOML array-of-tables format (`[[components]]`) per ADR-007, which guarantees document order by spec and allows figment to load the entire config through a single provider chain.
 
 ### Git Config Namespace
 
@@ -122,5 +124,7 @@ Configuration is read via `repo.config_snapshot()`, which automatically merges s
 **Negative:**
 - Settings exist in up to 4 places — potential confusion about which source wins
 - Must document the priority chain clearly
-- Two config loading paths: `load_config()` (simple, tests) and `load_layered_config()` (full)
 - Component definitions are asymmetric — TOML only while settings support multiple sources
+
+**Implementation Note:**
+figment handles the entire config via its provider chain (defaults → git config custom provider → TOML → ENV). Components use TOML array-of-tables format (ADR-007) which preserves document order by spec, allowing figment to load them directly without a separate code path.

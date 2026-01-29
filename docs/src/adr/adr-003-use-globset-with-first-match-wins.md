@@ -125,5 +125,6 @@ flowchart TD
 ## References
 
 - [globset documentation](https://docs.rs/globset)
+- [ADR-007: Use TOML array of tables for components](./adr-007-use-toml-array-of-tables-for-components.md) — ordering guarantee now comes from TOML spec (array of tables) rather than `IndexMap` implementation detail
 - [Requirements: FR-004](../../.claude/plans/mvp/reference/requirements.md#31-core-atomization) — Map files to components via glob patterns
 - [Requirements: Section 5](../../.claude/plans/mvp/reference/requirements.md#5-configuration-schema)
