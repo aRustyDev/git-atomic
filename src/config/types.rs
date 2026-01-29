@@ -77,3 +77,31 @@ impl Default for Settings {
         }
     }
 }
+
+impl Config {
+    /// Build a sample config with default settings and example components.
+    /// Used by `init` to generate `.atomic.toml` from the real types.
+    pub fn sample() -> Self {
+        let mut components = IndexMap::new();
+        components.insert(
+            "frontend".into(),
+            Component {
+                globs: vec!["src/ui/**".into(), "src/components/**".into()],
+                commit_type: None,
+                branch: None,
+            },
+        );
+        components.insert(
+            "backend".into(),
+            Component {
+                globs: vec!["src/api/**".into(), "src/db/**".into()],
+                commit_type: Some("fix".into()),
+                branch: None,
+            },
+        );
+        Self {
+            settings: Settings::default(),
+            components,
+        }
+    }
+}

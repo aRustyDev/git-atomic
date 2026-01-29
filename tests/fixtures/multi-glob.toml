@@ -1,0 +1,8 @@
+[settings]
+unmatched_files = "ignore"
+
+[components.infra]
+globs = ["terraform/**", "ansible/**", "docker/**"]
+
+[components.ci]
+globs = [".github/**", ".gitlab-ci.yml"]

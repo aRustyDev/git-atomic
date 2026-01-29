@@ -1,0 +1,17 @@
+[settings]
+base_branch = "develop"
+branch_template = "atomic/{component}"
+unmatched_files = "warn"
+default_commit_type = "feat"
+
+[components.frontend]
+globs = ["src/ui/**", "src/components/**"]
+commit_type = "feat"
+branch = "deploy/frontend"
+
+[components.backend]
+globs = ["src/api/**", "src/db/**"]
+commit_type = "fix"
+
+[components.docs]
+globs = ["docs/**", "*.md"]
