@@ -140,6 +140,11 @@ install:
     cargo install tdd-guard-rust
     brew bundle install .claude/reference/Brewfile
     mdbook-mermaid install docs/
+    # mdbook-pagetoc install docs/
+    # mdbook-svgbob install docs/
+    # mdbook-cmdrun install docs/
+    # mdbook-admonish install docs/
+    # mdbook-linkcheck install docs/
 
 # Show outdated dependencies
 [group('util')]

@@ -3,19 +3,39 @@ paths:
   - "**/CLAUDE.md"
   - "**/.claude/CLAUDE.md"
   - "**/CLAUDE.local.md"
-  - "**/.claude/CLAUDE.local.md"
 ---
 
-Don't duplicate content in these files
-  - WHY: If `~/.claude/CLAUDE.md` and `.claude/CLAUDE.md` both exist with identical content, you consume double the context.
-  - They layer, not replace.
-verify the more local files contain content that is more specific and ideally an extension of the more global files
+# CLAUDE.md Context Layering
 
-Priority order (loaded first → last, higher = foundation):
-  1. Enterprise policy (`/Library/Application Support/ClaudeCode/CLAUDE.md`)
-  2. Project (`./.claude/CLAUDE.md` or `./CLAUDE.md`)
-  3. Project rules (`./.claude/rules/*.md`)
-  4. User (`~/.claude/CLAUDE.md`)
-  5. Project local (`./CLAUDE.local.md`)
+## Problem
 
-Use `@import` syntax in *project* `CLAUDE.md` to reference shared content rather than duplicating.
+Multiple CLAUDE.md files exist at different levels. Duplicating content wastes context tokens and creates drift.
+
+## Priority Order (highest to lowest)
+
+| Priority | Location | Purpose |
+|----------|----------|---------|
+| 1 | `/Library/Application Support/ClaudeCode/CLAUDE.md` | Enterprise policy (immutable) |
+| 2 | `./.claude/CLAUDE.md` or `./CLAUDE.md` | Project conventions |
+| 3 | `./.claude/rules/*.md` | Domain-specific rules |
+| 4 | `~/.claude/CLAUDE.md` | User preferences |
+| 5 | `./CLAUDE.local.md` | Local overrides (gitignored) |
+
+Files layer additively. Lower priority files extend, not replace, higher ones.
+
+## What Goes Where
+
+| Content | File |
+|---------|------|
+| Cross-project preferences (editor style, commit style) | `~/.claude/CLAUDE.md` |
+| Project structure, conventions, workflows | `.claude/CLAUDE.md` |
+| Domain rules (how to write justfiles, handle docs) | `.claude/rules/*.md` |
+| Personal API keys, local paths, experiments | `CLAUDE.local.md` |
+
+## Rules
+
+- **Never duplicate** content that exists at a higher layer
+- **Always extend** rather than repeat
+- Use `@import` in project CLAUDE.md to reference shared content
+- If content applies to ALL projects, it belongs in `~/.claude/CLAUDE.md`
+- If content applies to matching files only, it belongs in `.claude/rules/` with `globs:` frontmatter

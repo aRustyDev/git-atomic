@@ -2,12 +2,27 @@
 paths:
   - "**/.claude/rules/**.md"
 ---
-Rules Loading Mechanics
 
-Fully loaded at startup. Application is conditional, not loading.
+# Rules Loading Mechanics
 
-- ALL .md files in `.claude/rules/` are discovered and loaded into context at session start
-- *Rules WITH paths*: frontmatter are loaded but only applied when working with matching files
-- *Rules WITHOUT paths*: apply unconditionally
+## How Rules Work
 
-*Implication*: A rule with paths: ["src/api/**/*.ts"] consumes context tokens even if you're working in tests/. The filtering happens at application time, not load time.
+- ALL `.md` files in `.claude/rules/` are loaded into context at session start
+- Loading is unconditional; application is conditional
+- Rules **with** `globs:` or `paths:` frontmatter: loaded always, applied only when working with matching files
+- Rules **without** frontmatter: apply unconditionally to all contexts
+
+## Implications
+
+- Every rule file consumes context tokens regardless of relevance
+- Keep rules **concise** - verbose rules waste tokens when not applicable
+- Use `globs:` frontmatter to scope rules to relevant files
+- Prefer fewer, well-scoped rules over many broad ones
+
+## Writing Good Rules
+
+1. **Add frontmatter** with `globs:` whenever the rule is file-type-specific
+2. **Be concise** - tables over prose, examples over explanations
+3. **No duplication** - don't repeat content from CLAUDE.md or other rules
+4. **Actionable** - rules should tell the agent what to do, not background info
+5. **Test scope** - verify glob patterns match intended files only

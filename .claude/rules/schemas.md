@@ -1,44 +1,40 @@
 ---
-globs:
-  - *.schema.json
+paths:
+  - "*.schema.json"
+  - "*.schema.yaml"
 ---
-# aRustyDev Repository Ecosystem
 
-## Source of Truth Repository for Schemas
+# Schema Management
 
-- **arustydev/schemas** - Central JSON/YAML schema registry
-  - Serves: `schemas.arusty.dev`
-  - Reference schemas from here, don't duplicate
+## Source of Truth
 
+`aRustyDev/schemas` → serves `schemas.arusty.dev`
 
+## Rules
 
+1. **Never duplicate schemas** - reference from `schemas.arusty.dev`
+2. **Use `$schema` references** in JSON/YAML files:
+   ```json
+   { "$schema": "https://schemas.arusty.dev/<domain>/<name>/latest.schema.json" }
+   ```
+3. **Version schemas** using directory structure: `<domain>/<name>/<version>.schema.json`
+4. **`latest`** is a symlink/redirect to the current stable version
 
-## Repository Relationships
+## Creating Schemas
 
-```
-dotfiles ─────────────────────────────────────────┐
-│                                                 │
-├── ai (submodule)                                │
-│   ├── plugins/                                  │
-│   ├── components/                               │
-│   └── .claude-plugin/marketplace.json           │
-│                                                 │
-└── just (installs from just.arusty.dev)          │
-                                                  │
-gha ──────────── (GitHub Actions source)          │
-schemas ──────── (JSON/YAML schemas)              │
-homebrew-tap ─── (Homebrew formulas)              │
-pre-commit-hooks (management repo) ───────────────│
-├── pre-commit-hooks-rs                           │
-├── pre-commit-hooks-py                           │
-├── pre-commit-hooks-go                           │
-└── pre-commit-hooks-js                           │
-mcp ──────────── (MCP server management) ──────────┘
-```
+1. Draft schema locally in project
+2. Validate against real data
+3. PR to `aRustyDev/schemas` when stable
+4. Update consumers to reference `schemas.arusty.dev` URL
 
-## Dotfiles Exceptions
+## Known Schemas
 
-The following are managed separately from dotfiles:
+| Schema | URL |
+|--------|-----|
+| Frontmatter | `schemas.arusty.dev/markdown/frontmatter/latest.schema.json` |
 
-- `arustydev/just` - Justfiles (installed via https://just.arusty.dev)
-- `arustydev/ai` - AI configs (lives in dotfiles as a git-submodule)
+## Schema Development
+
+- Use JSON Schema Draft 2020-12
+- Include `title`, `description`, and `examples` in schemas
+- Validate with `ajv` or equivalent before publishing
