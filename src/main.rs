@@ -17,6 +17,9 @@ fn run() -> Result<(), git_atomic::core::Error> {
         Some(Command::Validate) => {
             git_atomic::cli::commands::validate::run(&cli.config, &printer)
         }
+        Some(Command::Init) => {
+            git_atomic::cli::commands::init::run(&cli.config, &printer)
+        }
         None => {
             let args = AtomizeArgs {
                 commit: "HEAD".into(),

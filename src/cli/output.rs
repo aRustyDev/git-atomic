@@ -125,6 +125,21 @@ impl Printer {
         }
     }
 
+    pub fn print_init(&self, path: &std::path::Path) {
+        match self.mode {
+            OutputMode::Quiet => {}
+            OutputMode::Json => {
+                println!(
+                    "{}",
+                    serde_json::json!({"created": path.display().to_string()})
+                );
+            }
+            OutputMode::Human => {
+                println!("{} created {}", "✓".green(), path.display());
+            }
+        }
+    }
+
     pub fn print_validate_error(&self, err: &crate::core::Error) {
         match self.mode {
             OutputMode::Quiet => {}

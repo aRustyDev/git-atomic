@@ -4,24 +4,34 @@ pub mod output;
 use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
-/// git-atomic: create atomic commits & branches from a single changeset.
+/// Create atomic commits & branches from a single changeset.
+///
+/// Splits a multi-component commit into isolated per-component branches,
+/// each containing only the files that belong to that component.
+/// Run without a subcommand to atomize HEAD with default settings.
 #[derive(Debug, Parser)]
-#[command(name = "git-atomic", version, about)]
+#[command(
+    name = "git-atomic",
+    version,
+    about,
+    disable_help_subcommand = true,
+    subcommand_negates_reqs = true
+)]
 pub struct Cli {
-    /// Path to config file.
-    #[arg(long, default_value = ".atomic.toml")]
+    /// Path to the .atomic.toml configuration file.
+    #[arg(long, default_value = ".atomic.toml", global = true)]
     pub config: PathBuf,
 
-    /// Increase verbosity (-v, -vv).
-    #[arg(short, long, action = clap::ArgAction::Count)]
+    /// Increase log verbosity (-v for files, -vv for debug details).
+    #[arg(short, long, action = clap::ArgAction::Count, global = true)]
     pub verbose: u8,
 
-    /// Suppress non-error output.
-    #[arg(short, long)]
+    /// Suppress all non-error output.
+    #[arg(short, long, global = true)]
     pub quiet: bool,
 
-    /// Output as JSON.
-    #[arg(long)]
+    /// Emit machine-readable JSON instead of human-friendly text.
+    #[arg(long, global = true)]
     pub json: bool,
 
     #[command(subcommand)]
@@ -30,48 +40,53 @@ pub struct Cli {
 
 #[derive(Debug, Subcommand)]
 pub enum Command {
-    /// Atomize a commit into per-component branches (default).
+    /// Split a commit into per-component branches [default when omitted].
     Atomize(AtomizeArgs),
-    /// Show component/branch status for a commit.
+
+    /// Show each component's branch state relative to the base branch.
     Status(StatusArgs),
-    /// Validate the configuration file.
+
+    /// Check the configuration file for errors (bad globs, missing fields).
     Validate,
+
+    /// Generate a starter .atomic.toml in the current directory.
+    Init,
 }
 
 #[derive(Debug, Parser)]
 pub struct AtomizeArgs {
-    /// Source commit to atomize.
+    /// Git ref to atomize (commit SHA, branch, or tag).
     #[arg(long, default_value = "HEAD")]
     pub commit: String,
 
-    /// Commit range (start..end) to atomize.
-    #[arg(long)]
+    /// Atomize every commit in a range (e.g. main..feature).
+    #[arg(long, value_name = "START..END")]
     pub range: Option<String>,
 
-    /// Preview changes without mutating refs.
+    /// Show what would happen without creating or updating any branches.
     #[arg(long)]
     pub dry_run: bool,
 
-    /// Force-update diverged branches.
+    /// Overwrite branches that have diverged from the base branch.
     #[arg(long)]
     pub force: bool,
 
-    /// CI mode: atomize + push, fail on error.
+    /// Atomize and push in one step; exit non-zero on any failure.
     #[arg(long)]
     pub ci_mode: bool,
 
-    /// Push branches after atomizing.
+    /// Push component branches to the remote after atomizing.
     #[arg(long)]
     pub push: bool,
 
-    /// Remote to push to.
+    /// Git remote to push to when --push or --ci-mode is used.
     #[arg(long, default_value = "origin")]
     pub remote: String,
 }
 
 #[derive(Debug, Parser)]
 pub struct StatusArgs {
-    /// Commit to inspect.
+    /// Git ref whose changed files to inspect.
     #[arg(long, default_value = "HEAD")]
     pub commit: String,
 }
