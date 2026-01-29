@@ -150,4 +150,44 @@ mod tests {
         assert_eq!(UnmatchedPolicy::Warn.to_string(), "warn");
         assert_eq!(UnmatchedPolicy::Ignore.to_string(), "ignore");
     }
+
+    #[test]
+    fn config_serde_round_trip() {
+        let original = Config::sample();
+        let toml_str = toml::to_string(&original).expect("serialize to TOML");
+        let deserialized: Config = toml::from_str(&toml_str).expect("deserialize from TOML");
+
+        assert_eq!(deserialized.settings.base_branch, original.settings.base_branch);
+        assert_eq!(deserialized.settings.branch_template, original.settings.branch_template);
+        assert_eq!(deserialized.settings.unmatched_files, original.settings.unmatched_files);
+        assert_eq!(deserialized.settings.default_commit_type, original.settings.default_commit_type);
+        assert_eq!(deserialized.components.len(), original.components.len());
+        for (d, o) in deserialized.components.iter().zip(original.components.iter()) {
+            assert_eq!(d.name, o.name);
+            assert_eq!(d.globs, o.globs);
+            assert_eq!(d.commit_type, o.commit_type);
+            assert_eq!(d.branch, o.branch);
+        }
+    }
+
+    #[test]
+    fn unmatched_policy_serde_round_trip() {
+        #[derive(Debug, Serialize, Deserialize, PartialEq)]
+        struct Wrapper {
+            policy: UnmatchedPolicy,
+        }
+        for policy in [UnmatchedPolicy::Error, UnmatchedPolicy::Warn, UnmatchedPolicy::Ignore] {
+            let w = Wrapper { policy: policy.clone() };
+            let serialized = toml::to_string(&w).expect("serialize");
+            let deserialized: Wrapper = toml::from_str(&serialized).expect("deserialize");
+            assert_eq!(deserialized.policy, policy);
+        }
+    }
+
+    #[test]
+    fn empty_string_from_str_returns_error() {
+        let result = UnmatchedPolicy::from_str("");
+        assert!(result.is_err());
+        assert!(result.unwrap_err().contains("invalid unmatched_files policy"));
+    }
 }

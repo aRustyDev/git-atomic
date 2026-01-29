@@ -75,4 +75,78 @@ mod tests {
         let err = RefSpec::parse("main...feature").unwrap_err();
         assert!(err.contains("triple-dot"));
     }
+
+    #[test]
+    fn parse_unicode_refs() {
+        // Emoji ref
+        assert_eq!(
+            RefSpec::parse("\u{1F680}").unwrap(),
+            RefSpec::Single("\u{1F680}".into())
+        );
+        // CJK characters
+        assert_eq!(
+            RefSpec::parse("\u{4E16}\u{754C}").unwrap(),
+            RefSpec::Single("\u{4E16}\u{754C}".into())
+        );
+        // Unicode range
+        assert_eq!(
+            RefSpec::parse("\u{1F680}..\u{4E16}\u{754C}").unwrap(),
+            RefSpec::Range {
+                start: "\u{1F680}".into(),
+                end: "\u{4E16}\u{754C}".into(),
+            }
+        );
+    }
+
+    #[test]
+    fn parse_special_chars() {
+        // Spaces are preserved as-is (git will reject, but parser doesn't)
+        assert_eq!(
+            RefSpec::parse("my branch").unwrap(),
+            RefSpec::Single("my branch".into())
+        );
+        // Backslashes
+        assert_eq!(
+            RefSpec::parse("refs\\heads\\main").unwrap(),
+            RefSpec::Single("refs\\heads\\main".into())
+        );
+    }
+
+    #[test]
+    fn parse_whitespace_only() {
+        assert_eq!(
+            RefSpec::parse("   ").unwrap(),
+            RefSpec::Single("   ".into())
+        );
+        assert_eq!(
+            RefSpec::parse("\t").unwrap(),
+            RefSpec::Single("\t".into())
+        );
+    }
+
+    #[test]
+    fn parse_very_long_string() {
+        let long = "a".repeat(250);
+        assert_eq!(
+            RefSpec::parse(&long).unwrap(),
+            RefSpec::Single(long.clone())
+        );
+        // Long range
+        let long_range = format!("{}..{}", "b".repeat(200), "c".repeat(200));
+        assert_eq!(
+            RefSpec::parse(&long_range).unwrap(),
+            RefSpec::Range {
+                start: "b".repeat(200),
+                end: "c".repeat(200),
+            }
+        );
+    }
+
+    #[test]
+    fn parse_empty_string() {
+        assert_eq!(
+            RefSpec::parse("").unwrap(),
+            RefSpec::Single("".into())
+        );
+    }
 }

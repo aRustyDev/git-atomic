@@ -1,0 +1,5 @@
+---
+source: tests/snapshots.rs
+expression: stdout
+---
+[32m✓[39m configuration is valid

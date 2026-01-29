@@ -1,0 +1,5 @@
+---
+source: tests/snapshots.rs
+expression: stderr
+---
+[33m⚠[39m no components defined — create .atomic.toml with [[components]] or run git-atomic init

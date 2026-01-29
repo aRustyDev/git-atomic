@@ -170,4 +170,39 @@ mod tests {
         assert_eq!(m.match_file(Path::new("src/core/lib.rs")), Some("core"));
         assert_eq!(m.match_file(Path::new("docs/readme.md")), Some("_other"));
     }
+
+    #[test]
+    fn overlapping_globs_first_component_wins() {
+        let cfg = make_config(vec![
+            ("alpha", vec!["src/**"]),
+            ("beta", vec!["src/**"]),
+        ]);
+        let m = ComponentMatcher::from_config(&cfg).unwrap();
+        // Both claim src/**, but alpha is first in config order
+        assert_eq!(m.match_file(Path::new("src/lib.rs")), Some("alpha"));
+        assert_eq!(m.match_file(Path::new("src/deep/nested/file.rs")), Some("alpha"));
+    }
+
+    #[test]
+    fn empty_glob_list_matches_nothing() {
+        let cfg = make_config(vec![
+            ("empty", vec![]),
+            ("real", vec!["src/**"]),
+        ]);
+        let m = ComponentMatcher::from_config(&cfg).unwrap();
+        assert_eq!(m.match_file(Path::new("src/main.rs")), Some("real"));
+        assert_eq!(m.match_file(Path::new("anything.txt")), None);
+    }
+
+    #[test]
+    fn deeply_nested_paths_match() {
+        let cfg = make_config(vec![
+            ("deep", vec!["a/**"]),
+        ]);
+        let m = ComponentMatcher::from_config(&cfg).unwrap();
+        assert_eq!(
+            m.match_file(Path::new("a/b/c/d/e/f/g/h/i/j/file.rs")),
+            Some("deep")
+        );
+    }
 }

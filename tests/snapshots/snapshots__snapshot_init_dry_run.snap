@@ -1,0 +1,30 @@
+---
+source: tests/snapshots.rs
+expression: stdout
+---
+  [2m▸[0m would create [1m.atomic.toml[0m
+
+    [2m# git-atomic configuration[0m
+    [2m# See: https://github.com/aRustyDev/git-atomic[0m
+    [2m#[0m
+    [2m# Order matters: first matching component wins.[0m
+    [2m[0m
+    [2m[settings][0m
+    [2mbase_branch = "main"[0m
+    [2mbranch_template = "atomic/{component}"[0m
+    [2munmatched_files = "error"[0m
+    [2m[0m
+    [2m[[components]][0m
+    [2mname = "frontend"[0m
+    [2mglobs = [[0m
+    [2m    "src/ui/**",[0m
+    [2m    "src/components/**",[0m
+    [2m][0m
+    [2m[0m
+    [2m[[components]][0m
+    [2mname = "backend"[0m
+    [2mglobs = [[0m
+    [2m    "src/api/**",[0m
+    [2m    "src/db/**",[0m
+    [2m][0m
+    [2mcommit_type = "fix"[0m

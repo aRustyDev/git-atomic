@@ -1,0 +1,32 @@
+---
+source: tests/snapshots.rs
+expression: stdout
+---
+{
+  "config": {
+    "base_branch": {
+      "source": ".atomic.toml",
+      "value": "main"
+    },
+    "branch_template": {
+      "source": "default",
+      "value": "atomic/{component}"
+    },
+    "default_commit_type": {
+      "source": "default",
+      "value": null
+    },
+    "unmatched_files": {
+      "source": ".atomic.toml",
+      "value": "ignore"
+    }
+  }
+}
+[
+  {
+    "branch": "atomic/backend",
+    "component": "backend",
+    "file_count": 1,
+    "state": "Missing"
+  }
+]

@@ -1,0 +1,10 @@
+---
+source: tests/snapshots.rs
+expression: stdout
+---
+[1mSettings:[0m
+  base_branch          = main                           ([2m.atomic.toml[0m)
+  branch_template      = atomic/{component}             ([2mdefault[0m)
+  unmatched_files      = ignore                         ([2m.atomic.toml[0m)
+
+  [1mbackend[0m [2matomic/backend[0m ([33mmissing[39m, 1 file)

@@ -1,0 +1,5 @@
+---
+source: tests/snapshots.rs
+expression: stdout
+---
+[32m✓[39m [[36mbackend[39m] [2m[COMMIT_HASH][0m → [1matomic/backend[0m (create, 1 file)

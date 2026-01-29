@@ -1,0 +1,18 @@
+---
+source: tests/snapshots.rs
+expression: stdout
+---
+{
+  "dry_run": false,
+  "results": [
+    {
+      "branch": "atomic/backend",
+      "commit": "[COMMIT_HASH]",
+      "component": "backend",
+      "created": true,
+      "files": [
+        "src/api/handler.rs"
+      ]
+    }
+  ]
+}

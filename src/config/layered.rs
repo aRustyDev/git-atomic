@@ -388,4 +388,46 @@ globs = ["a/**"]
         assert_eq!(config.components.len(), 1);
         assert_eq!(config.components[0].name, "app");
     }
+
+    #[test]
+    fn validate_resolved_warns_on_empty_base_branch() {
+        let resolved = ResolvedConfig {
+            base_branch: Sourced::new("".into(), ConfigSource::File),
+            branch_template: Sourced::new("atomic/{component}".into(), ConfigSource::Default),
+            unmatched_files: Sourced::new(UnmatchedPolicy::Error, ConfigSource::Default),
+            default_commit_type: Sourced::new(None, ConfigSource::Default),
+            components: vec![Component {
+                name: "app".into(),
+                globs: vec!["src/**".into()],
+                commit_type: None,
+                branch: None,
+            }],
+        };
+
+        let warnings = validate_resolved(&resolved);
+        assert!(warnings.iter().any(|w| w.message.contains("base_branch is empty")));
+    }
+
+    #[test]
+    fn env_overrides_branch_template() {
+        figment::Jail::expect_with(|jail| {
+            jail.create_file(
+                ".atomic.toml",
+                r#"
+[[components]]
+name = "app"
+globs = ["src/**"]
+"#,
+            )?;
+
+            jail.set_env("GIT_ATOMIC_BRANCH_TEMPLATE", "custom/{component}");
+
+            let resolved =
+                load_layered_config(None, Path::new(".atomic.toml")).unwrap();
+            assert_eq!(resolved.branch_template.value, "custom/{component}");
+            assert_eq!(resolved.branch_template.source, ConfigSource::Env);
+
+            Ok(())
+        });
+    }
 }

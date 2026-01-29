@@ -2,6 +2,13 @@
 name = "git-atomic"
 version = "0.1.0"
 edition = "2024"
+description = "Split multi-component commits into isolated per-component branches"
+license = "MIT"
+repository = "https://github.com/aRustyDev/git-atomic"
+homepage = "https://github.com/aRustyDev/git-atomic"
+keywords = ["git", "atomic", "commits", "branches", "monorepo"]
+categories = ["command-line-utilities", "development-tools"]
+readme = "README.md"
 
 [package.metadata.git-cliff.bump]
 features_always_bump_minor = true
@@ -116,7 +123,11 @@ toml = "0.8"
 tracing = "0.1"
 
 [dev-dependencies]
+assert_cmd = "2"
 figment = { version = "0.10.19", features = ["test"] }
 glob = "0.3"
+insta = { version = "1", features = ["json", "filters"] }
 jsonschema = "0.29"
+predicates = "3"
+proptest = "1"
 tempfile = "3"
