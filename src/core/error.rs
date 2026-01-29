@@ -52,6 +52,12 @@ pub enum GitError {
     #[error("git operation failed: {0}")]
     Operation(String),
 
+    #[error("tree entry not found: {path}")]
+    TreeEntryNotFound { path: String },
+
+    #[error("ref update failed for {branch}: {reason}")]
+    RefUpdate { branch: String, reason: String },
+
     #[error(transparent)]
     Gix(Box<gix::open::Error>),
 }

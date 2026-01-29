@@ -61,13 +61,14 @@ repo = "git-atomic"
 [dependencies]
 clap = { version = "4.5.55", features = ["derive"] }
 figment = { version = "0.10.19", features = ["toml", "env"] }
-gix = "0.78.0"
+gix = { version = "0.78.0", features = ["tree-editor", "revision"] }
 globset = "0.4"
 indexmap = { version = "2", features = ["serde"] }
 schemars = { version = "1.2.0", features = ["derive"] }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = "1"
 thiserror = "2.0.18"
+owo-colors = "4"
 toml = "0.8"
 tracing = "0.1"
 

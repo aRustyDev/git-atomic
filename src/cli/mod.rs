@@ -1,4 +1,7 @@
-use clap::Parser;
+pub mod commands;
+pub mod output;
+
+use clap::{Parser, Subcommand};
 use std::path::PathBuf;
 
 /// git-atomic: create atomic commits & branches from a single changeset.
@@ -20,4 +23,55 @@ pub struct Cli {
     /// Output as JSON.
     #[arg(long)]
     pub json: bool,
+
+    #[command(subcommand)]
+    pub command: Option<Command>,
+}
+
+#[derive(Debug, Subcommand)]
+pub enum Command {
+    /// Atomize a commit into per-component branches (default).
+    Atomize(AtomizeArgs),
+    /// Show component/branch status for a commit.
+    Status(StatusArgs),
+    /// Validate the configuration file.
+    Validate,
+}
+
+#[derive(Debug, Parser)]
+pub struct AtomizeArgs {
+    /// Source commit to atomize.
+    #[arg(long, default_value = "HEAD")]
+    pub commit: String,
+
+    /// Commit range (start..end) to atomize.
+    #[arg(long)]
+    pub range: Option<String>,
+
+    /// Preview changes without mutating refs.
+    #[arg(long)]
+    pub dry_run: bool,
+
+    /// Force-update diverged branches.
+    #[arg(long)]
+    pub force: bool,
+
+    /// CI mode: atomize + push, fail on error.
+    #[arg(long)]
+    pub ci_mode: bool,
+
+    /// Push branches after atomizing.
+    #[arg(long)]
+    pub push: bool,
+
+    /// Remote to push to.
+    #[arg(long, default_value = "origin")]
+    pub remote: String,
+}
+
+#[derive(Debug, Parser)]
+pub struct StatusArgs {
+    /// Commit to inspect.
+    #[arg(long, default_value = "HEAD")]
+    pub commit: String,
 }
