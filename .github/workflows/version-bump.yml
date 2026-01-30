@@ -35,21 +35,20 @@ jobs:
           fetch-depth: 0
           token: ${{ steps.app-token.outputs.token }}
 
-      - name: Detect next version
+      - name: Install git-cliff
         uses: orhun/git-cliff-action@v4
-        id: cliff-version
         with:
           config: Cargo.toml
-          args: --bumped-version
+          args: --version
 
       - name: Check if bump needed
         id: check
         run: |
-          NEXT="${{ steps.cliff-version.outputs.version }}"
+          NEXT=$(git cliff --config Cargo.toml --bumped-version 2>/dev/null || echo "")
           CURRENT=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "next=$NEXT" >> "$GITHUB_OUTPUT"
           echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
-          if [ "$NEXT" = "$CURRENT" ]; then
+          if [ -z "$NEXT" ] || [ "$NEXT" = "$CURRENT" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
