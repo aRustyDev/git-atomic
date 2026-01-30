@@ -23,6 +23,7 @@ jobs:
         id: changelog
         uses: orhun/git-cliff-action@v4
         with:
+          config: Cargo.toml
           args: --latest --strip header
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
@@ -58,22 +59,49 @@ jobs:
     name: Publish to crates.io
     needs: build
     runs-on: ubuntu-latest
+    environment: release
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
+      - name: Load secrets from 1Password
+        id: op-secrets
+        uses: 1password/load-secrets-action@v3
+        with:
+          export-env: false
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          CARGO_REGISTRY_TOKEN: op://gh-git-atomic/crates.io/password
       - run: cargo publish
         env:
-          CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+          CARGO_REGISTRY_TOKEN: ${{ steps.op-secrets.outputs.CARGO_REGISTRY_TOKEN }}
 
   bump-homebrew:
     name: Bump Homebrew formula
     needs: publish
     runs-on: ubuntu-latest
+    environment: release
     steps:
+      - name: Load secrets from 1Password
+        id: op-secrets
+        uses: 1password/load-secrets-action@v3
+        with:
+          export-env: false
+        env:
+          OP_SERVICE_ACCOUNT_TOKEN: ${{ secrets.OP_SERVICE_ACCOUNT_TOKEN }}
+          X_REPO_AUTH_APP_ID: op://gh-shared/xauth/app/id
+          X_REPO_AUTH_PRIVATE_KEY: op://gh-shared/xauth/app/private-key.pem
+      - name: Generate GitHub App Token
+        id: app-token
+        uses: actions/create-github-app-token@v1
+        with:
+          app-id: ${{ steps.op-secrets.outputs.X_REPO_AUTH_APP_ID }}
+          private-key: ${{ steps.op-secrets.outputs.X_REPO_AUTH_PRIVATE_KEY }}
+          owner: aRustyDev
+          repositories: homebrew-tap
       - name: Trigger homebrew-tap bump
         uses: peter-evans/repository-dispatch@v3
         with:
-          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          token: ${{ steps.app-token.outputs.token }}
           repository: aRustyDev/homebrew-tap
           event-type: bump-formula
           client-payload: '{"formula": "git-atomic"}'
