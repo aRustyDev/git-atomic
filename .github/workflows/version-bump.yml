@@ -8,11 +8,10 @@ permissions:
   contents: write
 
 jobs:
-  generate-token:
-    name: Generate App Token
+  bump:
+    name: Detect & Tag Release
     runs-on: ubuntu-latest
-    outputs:
-      token: ${{ steps.app-token.outputs.token }}
+    if: "!contains(github.event.head_commit.message, 'chore(release):')"
     steps:
       - name: Load secrets from 1Password
         id: op-secrets
@@ -31,16 +30,10 @@ jobs:
           app-id: ${{ steps.op-secrets.outputs.X_REPO_AUTH_APP_ID }}
           private-key: ${{ steps.op-secrets.outputs.X_REPO_AUTH_PRIVATE_KEY }}
 
-  bump:
-    name: Detect & Tag Release
-    needs: [generate-token]
-    runs-on: ubuntu-latest
-    if: "!contains(github.event.head_commit.message, 'chore(release):')"
-    steps:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-          token: ${{ needs.generate-token.outputs.token }}
+          token: ${{ steps.app-token.outputs.token }}
 
       - name: Install git-cliff
         uses: orhun/git-cliff-action@v4
