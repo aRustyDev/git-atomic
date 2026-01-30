@@ -2,6 +2,11 @@
 
 All notable changes to this project will be documented in this file.
 
+## [0.1.2] - 2026-01-30
+
+### 🐛 Bug Fixes
+
+- *(ci)* Remove release environment from bump-homebrew job
 ## [0.1.1] - 2026-01-30
 
 ### 🐛 Bug Fixes
