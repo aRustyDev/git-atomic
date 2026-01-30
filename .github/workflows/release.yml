@@ -79,7 +79,6 @@ jobs:
     name: Bump Homebrew formula
     needs: publish
     runs-on: ubuntu-latest
-    environment: release
     steps:
       - name: Load secrets from 1Password
         id: op-secrets
