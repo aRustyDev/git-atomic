@@ -64,3 +64,16 @@ jobs:
       - run: cargo publish
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
+
+  bump-homebrew:
+    name: Bump Homebrew formula
+    needs: publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger homebrew-tap bump
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          repository: aRustyDev/homebrew-tap
+          event-type: bump-formula
+          client-payload: '{"formula": "git-atomic"}'
