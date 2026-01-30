@@ -15,7 +15,9 @@ pub fn walk_range(
     let mut excluded = HashSet::new();
     let mut queue = vec![start];
     while let Some(id) = queue.pop() {
-        if excluded.insert(id) && let Ok(commit) = repo.find_commit(id) {
+        if excluded.insert(id)
+            && let Ok(commit) = repo.find_commit(id)
+        {
             for parent in commit.parent_ids() {
                 queue.push(parent.detach());
             }
