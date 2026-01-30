@@ -27,7 +27,7 @@ pub fn run(
     let cfg = resolved.to_config();
     let matcher = ComponentMatcher::from_config(&cfg)?;
 
-    let refspec = RefSpec::parse(&args.source_ref).map_err(|e| Error::General(e))?;
+    let refspec = RefSpec::parse(&args.source_ref).map_err(Error::General)?;
 
     let (results, mut effects) = match refspec {
         RefSpec::Single(ref_str) => {

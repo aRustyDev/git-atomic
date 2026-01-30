@@ -38,6 +38,7 @@ pub fn commit_file(dir: &Path, path: &str, content: &str, message: &str) {
 }
 
 /// Build a Config with given component specs: vec of (name, globs).
+#[allow(dead_code)]
 pub fn test_config(components: &[(&str, &[&str])]) -> git_atomic::config::Config {
     git_atomic::config::Config {
         settings: git_atomic::config::Settings {

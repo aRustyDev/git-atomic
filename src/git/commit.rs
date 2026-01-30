@@ -111,7 +111,7 @@ mod tests {
         let source_tree = commit.tree().unwrap();
 
         let files = [Path::new("src/ui/app.ts")];
-        let file_refs: Vec<&Path> = files.iter().copied().collect();
+        let file_refs: Vec<&Path> = files.to_vec();
         let tree_id = build_partial_tree(&repo, &source_tree, &file_refs).unwrap();
 
         let tree = repo.find_tree(tree_id).unwrap();
@@ -147,7 +147,7 @@ mod tests {
         let author = commit.author().unwrap();
 
         let files = [Path::new("src/ui/app.ts")];
-        let file_refs: Vec<&Path> = files.iter().copied().collect();
+        let file_refs: Vec<&Path> = files.to_vec();
         let tree_id = build_partial_tree(&repo, &source_tree, &file_refs).unwrap();
 
         let commit_id =
@@ -171,7 +171,7 @@ mod tests {
         let source_tree = commit.tree().unwrap();
 
         let files = [Path::new("nonexistent.txt")];
-        let file_refs: Vec<&Path> = files.iter().copied().collect();
+        let file_refs: Vec<&Path> = files.to_vec();
         assert!(build_partial_tree(&repo, &source_tree, &file_refs).is_err());
     }
 }

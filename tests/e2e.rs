@@ -6,6 +6,7 @@ mod support;
 
 use support::{commit_file, init_test_repo, write_atomic_toml};
 
+#[allow(deprecated)]
 fn cmd(dir: &std::path::Path) -> Command {
     let mut c = Command::cargo_bin("git-atomic").unwrap();
     c.current_dir(dir);

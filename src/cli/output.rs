@@ -58,12 +58,14 @@ impl Printer {
 
                     let _ = writeln!(
                         out,
-                        "{} [{}] {} → {} ({} file{})",
+                        "{} [{}] {} → {} ({}{}, {} file{})",
                         "✓".green(),
                         r.component.cyan(),
                         short_id.dimmed(),
                         r.branch.bold(),
-                        format!("{prefix}{action}, {}", r.files.len()),
+                        prefix,
+                        action,
+                        r.files.len(),
                         if r.files.len() == 1 { "" } else { "s" }
                     );
 
