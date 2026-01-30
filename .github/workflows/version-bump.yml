@@ -36,22 +36,26 @@ jobs:
           token: ${{ steps.app-token.outputs.token }}
 
       - name: Install git-cliff
-        uses: orhun/git-cliff-action@v4
-        with:
-          config: Cargo.toml
-          args: --version
+        run: |
+          GC_VERSION="2.11.0"
+          curl -sSL "https://github.com/orhun/git-cliff/releases/download/v${GC_VERSION}/git-cliff-${GC_VERSION}-x86_64-unknown-linux-gnu.tar.gz" \
+            | tar xz -C /usr/local/bin --strip-components=1 "git-cliff-${GC_VERSION}/git-cliff"
+          git cliff --version
 
       - name: Check if bump needed
         id: check
         run: |
-          NEXT=$(git cliff --config Cargo.toml --bumped-version 2>/dev/null || echo "")
+          NEXT=$(git cliff --config Cargo.toml --bumped-version)
           CURRENT=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
           echo "next=$NEXT" >> "$GITHUB_OUTPUT"
           echo "current=$CURRENT" >> "$GITHUB_OUTPUT"
-          if [ -z "$NEXT" ] || [ "$NEXT" = "$CURRENT" ]; then
+          echo "Next: $NEXT, Current: $CURRENT"
+          if [ "$NEXT" = "$CURRENT" ]; then
             echo "skip=true" >> "$GITHUB_OUTPUT"
+            echo "No version bump needed"
           else
             echo "skip=false" >> "$GITHUB_OUTPUT"
+            echo "Bumping to $NEXT"
           fi
 
       - uses: dtolnay/rust-toolchain@stable
@@ -70,12 +74,7 @@ jobs:
 
       - name: Generate CHANGELOG.md
         if: steps.check.outputs.skip == 'false'
-        uses: orhun/git-cliff-action@v4
-        with:
-          config: Cargo.toml
-          args: --bump
-        env:
-          OUTPUT: CHANGELOG.md
+        run: git cliff --config Cargo.toml --bump -o CHANGELOG.md
 
       - name: Commit and tag
         if: steps.check.outputs.skip == 'false'
