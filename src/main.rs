@@ -3,7 +3,6 @@ use git_atomic::cli::output::Printer;
 use git_atomic::cli::{Cli, Command, CommitArgs};
 use std::process::ExitCode;
 
-
 fn main() -> ExitCode {
     let cli = Cli::parse();
     let printer = Printer::new(cli.json, cli.quiet, cli.verbose);
@@ -15,9 +14,7 @@ fn main() -> ExitCode {
         Some(Command::Status(ref args)) => {
             git_atomic::cli::commands::status::run(args, &cli.config, &printer)
         }
-        Some(Command::Validate) => {
-            git_atomic::cli::commands::validate::run(&cli.config, &printer)
-        }
+        Some(Command::Validate) => git_atomic::cli::commands::validate::run(&cli.config, &printer),
         Some(Command::Init) => {
             git_atomic::cli::commands::init::run(&cli.config, cli.dry_run, &printer)
         }

@@ -108,7 +108,7 @@ mod tests {
     }
 
     fn init_repo(dir: &Path) {
-        git(dir, &["init"]);
+        git(dir, &["init", "-b", "main"]);
         git(dir, &["config", "user.email", "test@test.com"]);
         git(dir, &["config", "user.name", "Test"]);
         std::fs::write(dir.join("file.txt"), "init").unwrap();
@@ -190,10 +190,7 @@ mod tests {
         // Without force: error
         assert!(mgr.parent_for("refs/heads/atomic/div", false).is_err());
         // With force: returns base
-        assert_eq!(
-            mgr.parent_for("refs/heads/atomic/div", true).unwrap(),
-            base
-        );
+        assert_eq!(mgr.parent_for("refs/heads/atomic/div", true).unwrap(), base);
     }
 
     #[test]

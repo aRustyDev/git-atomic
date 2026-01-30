@@ -19,7 +19,7 @@ pub fn git(dir: &Path, args: &[&str]) -> String {
 
 /// git init + config user + initial empty commit. Returns gix::Repository.
 pub fn init_test_repo(dir: &Path) -> gix::Repository {
-    git(dir, &["init"]);
+    git(dir, &["init", "-b", "main"]);
     git(dir, &["config", "user.email", "test@test.com"]);
     git(dir, &["config", "user.name", "Test"]);
     git(dir, &["commit", "--allow-empty", "-m", "initial"]);
@@ -58,9 +58,8 @@ pub fn test_config(components: &[(&str, &[&str])]) -> git_atomic::config::Config
 
 /// Write a .atomic.toml config file from component specs.
 pub fn write_atomic_toml(dir: &Path, components: &[(&str, &[&str])]) {
-    let mut content = String::from(
-        "[settings]\nbase_branch = \"main\"\nunmatched_files = \"ignore\"\n\n",
-    );
+    let mut content =
+        String::from("[settings]\nbase_branch = \"main\"\nunmatched_files = \"ignore\"\n\n");
     for (name, globs) in components {
         content.push_str(&format!("[[components]]\nname = \"{name}\"\nglobs = ["));
         let glob_strs: Vec<String> = globs.iter().map(|g| format!("\"{g}\"")).collect();

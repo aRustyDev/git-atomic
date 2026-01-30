@@ -13,8 +13,8 @@ fn fixtures_match_config_schema() {
     let mut checked = 0;
     for entry in glob::glob("tests/fixtures/**/*.toml").expect("valid glob") {
         let path = entry.expect("readable dir entry");
-        let content = fs::read_to_string(&path)
-            .unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+        let content =
+            fs::read_to_string(&path).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
 
         // Parse TOML → serde_json::Value for schema validation
         let toml_value: toml::Value = toml::from_str(&content)
@@ -46,7 +46,10 @@ fn sample_config_round_trips() {
     let parsed: Config = toml::from_str(&toml_str).expect("sample round-trips");
 
     assert_eq!(parsed.settings.base_branch, sample.settings.base_branch);
-    assert_eq!(parsed.settings.branch_template, sample.settings.branch_template);
+    assert_eq!(
+        parsed.settings.branch_template,
+        sample.settings.branch_template
+    );
     assert_eq!(parsed.components.len(), sample.components.len());
     for (i, comp) in sample.components.iter().enumerate() {
         let p = &parsed.components[i];

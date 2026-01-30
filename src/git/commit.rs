@@ -13,17 +13,14 @@ pub fn build_partial_tree(
         .map_err(|e| GitError::Operation(format!("create tree editor: {e}")))?;
 
     for file in files {
-        let path_str = file.to_str().ok_or_else(|| GitError::Operation(format!(
-            "non-UTF8 path: {}",
-            file.display()
-        )))?;
+        let path_str = file
+            .to_str()
+            .ok_or_else(|| GitError::Operation(format!("non-UTF8 path: {}", file.display())))?;
 
         let entry = source_tree
             .lookup_entry_by_path(path_str)
-            .map_err(|e| {
-                GitError::TreeEntryNotFound {
-                    path: format!("{}: {e}", file.display()),
-                }
+            .map_err(|e| GitError::TreeEntryNotFound {
+                path: format!("{}: {e}", file.display()),
             })?
             .ok_or_else(|| GitError::TreeEntryNotFound {
                 path: file.display().to_string(),
@@ -92,7 +89,7 @@ mod tests {
     }
 
     fn setup_repo(dir: &std::path::Path) {
-        git(dir, &["init"]);
+        git(dir, &["init", "-b", "main"]);
         git(dir, &["config", "user.email", "test@test.com"]);
         git(dir, &["config", "user.name", "Test"]);
         std::fs::create_dir_all(dir.join("src/ui")).unwrap();
@@ -118,11 +115,16 @@ mod tests {
         let tree_id = build_partial_tree(&repo, &source_tree, &file_refs).unwrap();
 
         let tree = repo.find_tree(tree_id).unwrap();
-        assert!(tree.lookup_entry_by_path("src/ui/app.ts").unwrap().is_some());
-        assert!(tree
-            .lookup_entry_by_path("src/api/handler.rs")
-            .unwrap()
-            .is_none());
+        assert!(
+            tree.lookup_entry_by_path("src/ui/app.ts")
+                .unwrap()
+                .is_some()
+        );
+        assert!(
+            tree.lookup_entry_by_path("src/api/handler.rs")
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[test]

@@ -1,5 +1,5 @@
-use proptest::prelude::*;
 use git_atomic::core::refspec::RefSpec;
+use proptest::prelude::*;
 
 proptest! {
     #[test]

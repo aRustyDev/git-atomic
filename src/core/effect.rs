@@ -55,9 +55,8 @@ pub fn execute(
 fn run_effect(repo: Option<&gix::Repository>, effect: &Effect) -> Result<(), Error> {
     match effect {
         Effect::RefTransaction { edits, .. } => {
-            let repo = repo.ok_or_else(|| {
-                Error::General("RefTransaction requires a repository".into())
-            })?;
+            let repo =
+                repo.ok_or_else(|| Error::General("RefTransaction requires a repository".into()))?;
 
             let mut gix_edits: Vec<gix::refs::transaction::RefEdit> = Vec::new();
             for e in edits {
@@ -116,12 +115,14 @@ fn run_effect(repo: Option<&gix::Repository>, effect: &Effect) -> Result<(), Err
         Effect::WriteFile { path, content, .. } => {
             if let Some(parent) = path.parent() {
                 std::fs::create_dir_all(parent).map_err(|e| {
-                    Error::General(format!("failed to create directory {}: {e}", parent.display()))
+                    Error::General(format!(
+                        "failed to create directory {}: {e}",
+                        parent.display()
+                    ))
                 })?;
             }
-            std::fs::write(path, content).map_err(|e| {
-                Error::General(format!("failed to write {}: {e}", path.display()))
-            })?;
+            std::fs::write(path, content)
+                .map_err(|e| Error::General(format!("failed to write {}: {e}", path.display())))?;
         }
     }
     Ok(())

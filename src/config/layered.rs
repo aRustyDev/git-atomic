@@ -2,10 +2,10 @@ use crate::config::git_provider::GitConfigProvider;
 use crate::config::source::{ConfigSource, Sourced};
 use crate::config::types::{Component, Config, Settings, UnmatchedPolicy};
 use crate::core::ConfigError;
-use figment::providers::{Env, Format, Serialized, Toml};
-use figment::value::magic::Tagged;
-use figment::value::Tag;
 use figment::Figment;
+use figment::providers::{Env, Format, Serialized, Toml};
+use figment::value::Tag;
+use figment::value::magic::Tagged;
 use serde::Deserialize;
 use std::path::Path;
 
@@ -122,14 +122,11 @@ pub fn load_layered_config(
         figment = figment.merge(Toml::file(config_path));
     }
 
-    figment = figment.merge(
-        Env::prefixed("GIT_ATOMIC_")
-            .map(|key| {
-                // GIT_ATOMIC_BASE_BRANCH -> settings.base_branch
-                let k = key.as_str().to_lowercase();
-                format!("settings.{k}").into()
-            }),
-    );
+    figment = figment.merge(Env::prefixed("GIT_ATOMIC_").map(|key| {
+        // GIT_ATOMIC_BASE_BRANCH -> settings.base_branch
+        let k = key.as_str().to_lowercase();
+        format!("settings.{k}").into()
+    }));
 
     let tagged: TaggedConfig = figment.extract().map_err(|e| ConfigError::Invalid {
         reason: e.to_string(),
@@ -165,10 +162,7 @@ pub fn load_layered_config(
         .unwrap_or(ConfigSource::Default);
 
     Ok(ResolvedConfig {
-        base_branch: Sourced::new(
-            tagged.settings.base_branch.into_inner(),
-            base_branch_source,
-        ),
+        base_branch: Sourced::new(tagged.settings.base_branch.into_inner(), base_branch_source),
         branch_template: Sourced::new(
             tagged.settings.branch_template.into_inner(),
             branch_template_source,
@@ -226,8 +220,7 @@ mod tests {
     #[test]
     fn defaults_when_no_file() {
         figment::Jail::expect_with(|_jail| {
-            let resolved =
-                load_layered_config(None, Path::new("nonexistent.toml")).unwrap();
+            let resolved = load_layered_config(None, Path::new("nonexistent.toml")).unwrap();
             assert_eq!(resolved.base_branch.value, "main");
             assert_eq!(resolved.base_branch.source, ConfigSource::Default);
             assert!(resolved.components.is_empty());
@@ -250,8 +243,7 @@ globs = ["src/**"]
 "#,
             )?;
 
-            let resolved =
-                load_layered_config(None, Path::new(".atomic.toml")).unwrap();
+            let resolved = load_layered_config(None, Path::new(".atomic.toml")).unwrap();
             assert_eq!(resolved.base_branch.value, "develop");
             assert_eq!(resolved.base_branch.source, ConfigSource::File);
             assert_eq!(resolved.components.len(), 1);
@@ -277,8 +269,7 @@ globs = ["src/**"]
 
             jail.set_env("GIT_ATOMIC_BASE_BRANCH", "staging");
 
-            let resolved =
-                load_layered_config(None, Path::new(".atomic.toml")).unwrap();
+            let resolved = load_layered_config(None, Path::new(".atomic.toml")).unwrap();
             assert_eq!(resolved.base_branch.value, "staging");
             assert_eq!(resolved.base_branch.source, ConfigSource::Env);
 
@@ -324,8 +315,7 @@ globs = ["a/**"]
 "#,
             )?;
 
-            let resolved =
-                load_layered_config(None, Path::new(".atomic.toml")).unwrap();
+            let resolved = load_layered_config(None, Path::new(".atomic.toml")).unwrap();
             assert_eq!(resolved.components[0].name, "zebra");
             assert_eq!(resolved.components[1].name, "alpha");
             Ok(())
@@ -405,7 +395,11 @@ globs = ["a/**"]
         };
 
         let warnings = validate_resolved(&resolved);
-        assert!(warnings.iter().any(|w| w.message.contains("base_branch is empty")));
+        assert!(
+            warnings
+                .iter()
+                .any(|w| w.message.contains("base_branch is empty"))
+        );
     }
 
     #[test]
@@ -422,8 +416,7 @@ globs = ["src/**"]
 
             jail.set_env("GIT_ATOMIC_BRANCH_TEMPLATE", "custom/{component}");
 
-            let resolved =
-                load_layered_config(None, Path::new(".atomic.toml")).unwrap();
+            let resolved = load_layered_config(None, Path::new(".atomic.toml")).unwrap();
             assert_eq!(resolved.branch_template.value, "custom/{component}");
             assert_eq!(resolved.branch_template.source, ConfigSource::Env);
 

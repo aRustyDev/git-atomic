@@ -81,10 +81,7 @@ mod tests {
 
     #[test]
     fn exit_codes_match_spec() {
-        assert_eq!(
-            Error::General("x".into()).exit_code(),
-            ExitCode::from(1)
-        );
+        assert_eq!(Error::General("x".into()).exit_code(), ExitCode::from(1));
         assert_eq!(
             Error::Config(ConfigError::Invalid {
                 reason: "bad".into()

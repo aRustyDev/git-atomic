@@ -1,12 +1,13 @@
-use crate::cli::output::Printer;
 use crate::cli::StatusArgs;
+use crate::cli::output::Printer;
 use crate::core::{ComponentMatcher, Error};
 use crate::git::branch::BranchManager;
 use std::path::{Path, PathBuf};
 
 pub fn run(args: &StatusArgs, config_path: &Path, printer: &Printer) -> Result<(), Error> {
-    let repo =
-        crate::git::open_repo(&std::env::current_dir().map_err(|e| Error::General(e.to_string()))?)?;
+    let repo = crate::git::open_repo(
+        &std::env::current_dir().map_err(|e| Error::General(e.to_string()))?,
+    )?;
 
     let resolved = crate::config::load_layered_config(Some(&repo), config_path)?;
 
@@ -49,7 +50,10 @@ pub fn run(args: &StatusArgs, config_path: &Path, printer: &Printer) -> Result<(
 
         components.push((
             name.to_string(),
-            comp_files.iter().map(|p| p.to_path_buf()).collect::<Vec<PathBuf>>(),
+            comp_files
+                .iter()
+                .map(|p| p.to_path_buf())
+                .collect::<Vec<PathBuf>>(),
             state,
             branch_display,
         ));

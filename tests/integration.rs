@@ -4,9 +4,9 @@ use std::collections::HashSet;
 use std::path::{Path, PathBuf};
 
 use git_atomic::cli::output::Printer;
-use git_atomic::config::{load_config, Config, Settings, UnmatchedPolicy};
-use git_atomic::core::effect::{self, Effect};
+use git_atomic::config::{Config, Settings, UnmatchedPolicy, load_config};
 use git_atomic::core::ComponentMatcher;
+use git_atomic::core::effect::{self, Effect};
 use git_atomic::git;
 use git_atomic::git::atomize::{plan_atomize, plan_atomize_range};
 use git_atomic::git::walk;

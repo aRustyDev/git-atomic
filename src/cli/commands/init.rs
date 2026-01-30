@@ -1,7 +1,7 @@
 use crate::cli::output::Printer;
 use crate::config::Config;
-use crate::core::effect::{self, Effect};
 use crate::core::Error;
+use crate::core::effect::{self, Effect};
 use std::path::Path;
 
 const HEADER: &str = "\

@@ -23,7 +23,10 @@ fn commit_creates_branches() {
     cmd(dir).arg("commit").assert().success();
 
     let output = support::git(dir, &["branch"]);
-    assert!(output.contains("atomic/app"), "expected atomic/app branch, got: {output}");
+    assert!(
+        output.contains("atomic/app"),
+        "expected atomic/app branch, got: {output}"
+    );
 }
 
 #[test]
@@ -51,13 +54,13 @@ fn dry_run_no_mutation() {
 
     let branches_before = support::git(dir, &["branch"]);
 
-    cmd(dir)
-        .args(["--dry-run", "commit"])
-        .assert()
-        .success();
+    cmd(dir).args(["--dry-run", "commit"]).assert().success();
 
     let branches_after = support::git(dir, &["branch"]);
-    assert_eq!(branches_before, branches_after, "dry-run should not create branches");
+    assert_eq!(
+        branches_before, branches_after,
+        "dry-run should not create branches"
+    );
 }
 
 #[test]
@@ -68,10 +71,7 @@ fn json_output_valid() {
     write_atomic_toml(dir, &[("app", &["src/**"])]);
     commit_file(dir, "src/lib.rs", "// lib", "feat: add lib");
 
-    let output = cmd(dir)
-        .args(["--json", "commit"])
-        .output()
-        .unwrap();
+    let output = cmd(dir).args(["--json", "commit"]).output().unwrap();
 
     assert!(output.status.success());
     let stdout = String::from_utf8_lossy(&output.stdout);
@@ -89,7 +89,10 @@ fn init_creates_config() {
 
     cmd(dir).arg("init").assert().success();
 
-    assert!(dir.join(".atomic.toml").exists(), ".atomic.toml should be created");
+    assert!(
+        dir.join(".atomic.toml").exists(),
+        ".atomic.toml should be created"
+    );
 }
 
 #[test]
@@ -98,12 +101,12 @@ fn init_dry_run_no_file() {
     let dir = tmp.path();
     init_test_repo(dir);
 
-    cmd(dir)
-        .args(["--dry-run", "init"])
-        .assert()
-        .success();
+    cmd(dir).args(["--dry-run", "init"]).assert().success();
 
-    assert!(!dir.join(".atomic.toml").exists(), ".atomic.toml should not be created in dry-run");
+    assert!(
+        !dir.join(".atomic.toml").exists(),
+        ".atomic.toml should not be created in dry-run"
+    );
 }
 
 #[test]
@@ -123,10 +126,7 @@ fn validate_bad_config() {
     init_test_repo(dir);
     std::fs::write(dir.join(".atomic.toml"), "this is not valid toml [[[").unwrap();
 
-    cmd(dir)
-        .arg("validate")
-        .assert()
-        .failure();
+    cmd(dir).arg("validate").assert().failure();
 }
 
 #[test]

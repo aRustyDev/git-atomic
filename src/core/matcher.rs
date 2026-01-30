@@ -68,11 +68,7 @@ impl ComponentMatcher {
         for &path in paths {
             match self.match_file(path) {
                 Some(name) => {
-                    let idx = self
-                        .component_names
-                        .iter()
-                        .position(|n| n == name)
-                        .unwrap();
+                    let idx = self.component_names.iter().position(|n| n == name).unwrap();
                     buckets[idx].push(path);
                 }
                 None => unmatched.push(path),
@@ -128,10 +124,7 @@ mod tests {
 
     #[test]
     fn first_match_wins() {
-        let cfg = make_config(vec![
-            ("specific", vec!["src/**"]),
-            ("catchall", vec!["**"]),
-        ]);
+        let cfg = make_config(vec![("specific", vec!["src/**"]), ("catchall", vec!["**"])]);
         let m = ComponentMatcher::from_config(&cfg).unwrap();
         // src/foo matches both, but "specific" is first.
         assert_eq!(m.match_file(Path::new("src/foo.rs")), Some("specific"));
@@ -141,10 +134,7 @@ mod tests {
 
     #[test]
     fn group_files_works() {
-        let cfg = make_config(vec![
-            ("ui", vec!["src/ui/**"]),
-            ("api", vec!["src/api/**"]),
-        ]);
+        let cfg = make_config(vec![("ui", vec!["src/ui/**"]), ("api", vec!["src/api/**"])]);
         let m = ComponentMatcher::from_config(&cfg).unwrap();
 
         let paths: Vec<&Path> = vec![
@@ -162,10 +152,7 @@ mod tests {
 
     #[test]
     fn catch_all_last() {
-        let cfg = make_config(vec![
-            ("core", vec!["src/core/**"]),
-            ("_other", vec!["**"]),
-        ]);
+        let cfg = make_config(vec![("core", vec!["src/core/**"]), ("_other", vec!["**"])]);
         let m = ComponentMatcher::from_config(&cfg).unwrap();
         assert_eq!(m.match_file(Path::new("src/core/lib.rs")), Some("core"));
         assert_eq!(m.match_file(Path::new("docs/readme.md")), Some("_other"));
@@ -173,22 +160,19 @@ mod tests {
 
     #[test]
     fn overlapping_globs_first_component_wins() {
-        let cfg = make_config(vec![
-            ("alpha", vec!["src/**"]),
-            ("beta", vec!["src/**"]),
-        ]);
+        let cfg = make_config(vec![("alpha", vec!["src/**"]), ("beta", vec!["src/**"])]);
         let m = ComponentMatcher::from_config(&cfg).unwrap();
         // Both claim src/**, but alpha is first in config order
         assert_eq!(m.match_file(Path::new("src/lib.rs")), Some("alpha"));
-        assert_eq!(m.match_file(Path::new("src/deep/nested/file.rs")), Some("alpha"));
+        assert_eq!(
+            m.match_file(Path::new("src/deep/nested/file.rs")),
+            Some("alpha")
+        );
     }
 
     #[test]
     fn empty_glob_list_matches_nothing() {
-        let cfg = make_config(vec![
-            ("empty", vec![]),
-            ("real", vec!["src/**"]),
-        ]);
+        let cfg = make_config(vec![("empty", vec![]), ("real", vec!["src/**"])]);
         let m = ComponentMatcher::from_config(&cfg).unwrap();
         assert_eq!(m.match_file(Path::new("src/main.rs")), Some("real"));
         assert_eq!(m.match_file(Path::new("anything.txt")), None);
@@ -196,9 +180,7 @@ mod tests {
 
     #[test]
     fn deeply_nested_paths_match() {
-        let cfg = make_config(vec![
-            ("deep", vec!["a/**"]),
-        ]);
+        let cfg = make_config(vec![("deep", vec!["a/**"])]);
         let m = ComponentMatcher::from_config(&cfg).unwrap();
         assert_eq!(
             m.match_file(Path::new("a/b/c/d/e/f/g/h/i/j/file.rs")),

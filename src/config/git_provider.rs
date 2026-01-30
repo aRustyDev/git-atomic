@@ -18,28 +18,16 @@ impl GitConfigProvider {
             let snapshot = repo.config_snapshot();
 
             if let Some(v) = snapshot.string_by("atomic", None, "baseBranch") {
-                settings.insert(
-                    "base_branch".into(),
-                    v.to_string().into(),
-                );
+                settings.insert("base_branch".into(), v.to_string().into());
             }
             if let Some(v) = snapshot.string_by("atomic", None, "branchTemplate") {
-                settings.insert(
-                    "branch_template".into(),
-                    v.to_string().into(),
-                );
+                settings.insert("branch_template".into(), v.to_string().into());
             }
             if let Some(v) = snapshot.string_by("atomic", None, "unmatchedFiles") {
-                settings.insert(
-                    "unmatched_files".into(),
-                    v.to_string().into(),
-                );
+                settings.insert("unmatched_files".into(), v.to_string().into());
             }
             if let Some(v) = snapshot.string_by("atomic", None, "defaultCommitType") {
-                settings.insert(
-                    "default_commit_type".into(),
-                    v.to_string().into(),
-                );
+                settings.insert("default_commit_type".into(), v.to_string().into());
             }
         }
         Self { settings }

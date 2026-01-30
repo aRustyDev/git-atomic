@@ -1,5 +1,5 @@
-use crate::config::layered::ConfigWarning;
 use crate::config::ResolvedConfig;
+use crate::config::layered::ConfigWarning;
 use crate::core::effect::Effect;
 use crate::git::atomize::AtomicResult;
 use crate::git::branch::BranchState;
@@ -147,10 +147,7 @@ impl Printer {
         match self.mode {
             OutputMode::Quiet => {}
             OutputMode::Json => {
-                println!(
-                    "{}",
-                    serde_json::json!({"error": err.to_string()})
-                );
+                println!("{}", serde_json::json!({"error": err.to_string()}));
             }
             OutputMode::Human => {
                 eprintln!("{} {}", "✗".red(), err);
@@ -241,10 +238,7 @@ impl Printer {
         match self.mode {
             OutputMode::Quiet => {}
             OutputMode::Json => {
-                println!(
-                    "{}",
-                    serde_json::json!({"warning": warning.message})
-                );
+                println!("{}", serde_json::json!({"warning": warning.message}));
             }
             OutputMode::Human => {
                 eprintln!("{} {}", "⚠".yellow(), warning.message);
@@ -278,7 +272,11 @@ impl Printer {
                             "branches": branches,
                         })
                     }
-                    Effect::WriteFile { path, content, structured } => {
+                    Effect::WriteFile {
+                        path,
+                        content,
+                        structured,
+                    } => {
                         let content_value = structured
                             .clone()
                             .unwrap_or_else(|| serde_json::Value::String(content.clone()));
@@ -298,7 +296,8 @@ impl Printer {
                     Effect::RefTransaction { edits, .. } => {
                         for e in edits {
                             let action = if e.created { "create" } else { "update" };
-                            let branch = e.ref_name
+                            let branch = e
+                                .ref_name
                                 .strip_prefix("refs/heads/")
                                 .unwrap_or(&e.ref_name);
                             let _ = writeln!(

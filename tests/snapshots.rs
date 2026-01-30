@@ -28,8 +28,18 @@ fn setup_repo_with_components() -> TempDir {
             ("backend", &["src/api/**"][..]),
         ],
     );
-    commit_file(dir, "src/ui/app.tsx", "export default function App() {}", "feat: add frontend");
-    commit_file(dir, "src/api/handler.rs", "pub fn handle() {}", "feat: add backend");
+    commit_file(
+        dir,
+        "src/ui/app.tsx",
+        "export default function App() {}",
+        "feat: add frontend",
+    );
+    commit_file(
+        dir,
+        "src/api/handler.rs",
+        "pub fn handle() {}",
+        "feat: add backend",
+    );
     tmp
 }
 

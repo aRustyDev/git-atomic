@@ -68,12 +68,13 @@ pub fn plan_atomize(
             .unwrap_or("feat");
 
         let state = branch_mgr.check_state(&ref_name)?;
-        let parent_id = branch_mgr.parent_for(&ref_name, force).map_err(|_| {
-            Error::DivergedBranch {
-                branch: ref_name.clone(),
-                base: config.settings.base_branch.clone(),
-            }
-        })?;
+        let parent_id =
+            branch_mgr
+                .parent_for(&ref_name, force)
+                .map_err(|_| Error::DivergedBranch {
+                    branch: ref_name.clone(),
+                    base: config.settings.base_branch.clone(),
+                })?;
 
         let created = matches!(state, BranchState::Missing);
         let previous = match &state {
@@ -112,11 +113,7 @@ pub fn plan_atomize(
 
     let mut effects = Vec::new();
     if !planned_edits.is_empty() {
-        let repo_path = repo
-            .path()
-            .parent()
-            .unwrap_or(repo.path())
-            .to_path_buf();
+        let repo_path = repo.path().parent().unwrap_or(repo.path()).to_path_buf();
         effects.push(Effect::RefTransaction {
             repo_path,
             edits: planned_edits,
@@ -192,7 +189,8 @@ pub fn plan_atomize_range(
         let source_summary = extract_summary(&source_commit);
 
         // Handle unmatched effective files
-        let path_refs: Vec<&std::path::Path> = effective_changed.iter().map(|p| p.as_path()).collect();
+        let path_refs: Vec<&std::path::Path> =
+            effective_changed.iter().map(|p| p.as_path()).collect();
         let (grouped, unmatched) = matcher.group_files(&path_refs);
 
         if !unmatched.is_empty() {
@@ -226,9 +224,14 @@ pub fn plan_atomize_range(
                         cs.cumulative_files.iter().map(|p| p.as_path()).collect();
                     let tree_id = commit::build_partial_tree(repo, &source_tree, &file_refs)?;
 
-                    let message = commit::generate_message(component_name, commit_type, &source_summary);
+                    let message =
+                        commit::generate_message(component_name, commit_type, &source_summary);
                     let new_commit_id = commit::create_commit(
-                        repo, tree_id, cs.parent_id, &message, source_author,
+                        repo,
+                        tree_id,
+                        cs.parent_id,
+                        &message,
+                        source_author,
                     )?;
 
                     cs.parent_id = new_commit_id;
@@ -262,10 +265,10 @@ pub fn plan_atomize_range(
                         cumulative_files.iter().map(|p| p.as_path()).collect();
                     let tree_id = commit::build_partial_tree(repo, &source_tree, &file_refs)?;
 
-                    let message = commit::generate_message(component_name, commit_type, &source_summary);
-                    let new_commit_id = commit::create_commit(
-                        repo, tree_id, parent_id, &message, source_author,
-                    )?;
+                    let message =
+                        commit::generate_message(component_name, commit_type, &source_summary);
+                    let new_commit_id =
+                        commit::create_commit(repo, tree_id, parent_id, &message, source_author)?;
 
                     let branch_display = ref_name
                         .strip_prefix("refs/heads/")
@@ -313,11 +316,7 @@ pub fn plan_atomize_range(
 
     let mut effects = Vec::new();
     if !planned_edits.is_empty() {
-        let repo_path = repo
-            .path()
-            .parent()
-            .unwrap_or(repo.path())
-            .to_path_buf();
+        let repo_path = repo.path().parent().unwrap_or(repo.path()).to_path_buf();
         effects.push(Effect::RefTransaction {
             repo_path,
             edits: planned_edits,
@@ -330,11 +329,9 @@ pub fn plan_atomize_range(
 /// Handle unmatched files according to the configured policy.
 fn handle_unmatched(config: &Config, unmatched: &[&std::path::Path]) -> Result<(), Error> {
     match config.settings.unmatched_files {
-        crate::config::UnmatchedPolicy::Error => {
-            Err(Error::UnmatchedFiles {
-                paths: unmatched.iter().map(|p| p.to_path_buf()).collect(),
-            })
-        }
+        crate::config::UnmatchedPolicy::Error => Err(Error::UnmatchedFiles {
+            paths: unmatched.iter().map(|p| p.to_path_buf()).collect(),
+        }),
         crate::config::UnmatchedPolicy::Warn => {
             eprintln!(
                 "warning: unmatched files: {}",
@@ -354,11 +351,7 @@ fn handle_unmatched(config: &Config, unmatched: &[&std::path::Path]) -> Result<(
 fn extract_summary(commit: &gix::Commit<'_>) -> String {
     let msg = commit.message_raw_sloppy();
     let msg_str = String::from_utf8_lossy(msg.as_ref());
-    msg_str
-        .lines()
-        .next()
-        .unwrap_or("commit")
-        .to_string()
+    msg_str.lines().next().unwrap_or("commit").to_string()
 }
 
 #[cfg(test)]
@@ -379,7 +372,7 @@ mod tests {
     }
 
     fn setup_multi_component_repo(dir: &Path) {
-        git(dir, &["init"]);
+        git(dir, &["init", "-b", "main"]);
         git(dir, &["config", "user.email", "test@test.com"]);
         git(dir, &["config", "user.name", "Test"]);
 
@@ -423,8 +416,7 @@ commit_type = "fix"
         let matcher = ComponentMatcher::from_config(&config).unwrap();
         let head = crate::git::resolve_commit(&repo, "HEAD").unwrap();
 
-        let (results, effects) =
-            plan_atomize(&repo, &config, &matcher, head, false).unwrap();
+        let (results, effects) = plan_atomize(&repo, &config, &matcher, head, false).unwrap();
 
         assert_eq!(results.len(), 2);
         assert_eq!(effects.len(), 1);
@@ -432,7 +424,11 @@ commit_type = "fix"
         for result in &results {
             let ref_name = format!("refs/heads/{}", result.branch);
             let reference = repo.try_find_reference(&ref_name).unwrap();
-            assert!(reference.is_none(), "branch {} should not exist yet", result.branch);
+            assert!(
+                reference.is_none(),
+                "branch {} should not exist yet",
+                result.branch
+            );
         }
     }
 
@@ -446,8 +442,7 @@ commit_type = "fix"
         let matcher = ComponentMatcher::from_config(&config).unwrap();
         let head = crate::git::resolve_commit(&repo, "HEAD").unwrap();
 
-        let (results, effects) =
-            plan_atomize(&repo, &config, &matcher, head, false).unwrap();
+        let (results, effects) = plan_atomize(&repo, &config, &matcher, head, false).unwrap();
 
         let printer = crate::cli::output::Printer::new(false, true, 0);
         crate::core::effect::execute(Some(&repo), &effects, false, &printer).unwrap();
@@ -486,8 +481,7 @@ commit_type = "fix"
         let matcher = ComponentMatcher::from_config(&config).unwrap();
         let head = crate::git::resolve_commit(&repo, "HEAD").unwrap();
 
-        let (results, effects) =
-            plan_atomize(&repo, &config, &matcher, head, false).unwrap();
+        let (results, effects) = plan_atomize(&repo, &config, &matcher, head, false).unwrap();
 
         let printer = crate::cli::output::Printer::new(false, true, 0);
         crate::core::effect::execute(Some(&repo), &effects, false, &printer).unwrap();
@@ -497,17 +491,27 @@ commit_type = "fix"
             let tree = c.tree().unwrap();
 
             if result.component == "frontend" {
-                assert!(tree.lookup_entry_by_path("src/ui/app.ts").unwrap().is_some());
-                assert!(tree
-                    .lookup_entry_by_path("src/api/handler.rs")
-                    .unwrap()
-                    .is_none());
+                assert!(
+                    tree.lookup_entry_by_path("src/ui/app.ts")
+                        .unwrap()
+                        .is_some()
+                );
+                assert!(
+                    tree.lookup_entry_by_path("src/api/handler.rs")
+                        .unwrap()
+                        .is_none()
+                );
             } else {
-                assert!(tree
-                    .lookup_entry_by_path("src/api/handler.rs")
-                    .unwrap()
-                    .is_some());
-                assert!(tree.lookup_entry_by_path("src/ui/app.ts").unwrap().is_none());
+                assert!(
+                    tree.lookup_entry_by_path("src/api/handler.rs")
+                        .unwrap()
+                        .is_some()
+                );
+                assert!(
+                    tree.lookup_entry_by_path("src/ui/app.ts")
+                        .unwrap()
+                        .is_none()
+                );
             }
         }
     }
@@ -515,7 +519,7 @@ commit_type = "fix"
     #[test]
     fn range_filters_net_zero_files() {
         let dir = tempfile::tempdir().unwrap();
-        git(dir.path(), &["init"]);
+        git(dir.path(), &["init", "-b", "main"]);
         git(dir.path(), &["config", "user.email", "test@test.com"]);
         git(dir.path(), &["config", "user.name", "Test"]);
         git(dir.path(), &["commit", "--allow-empty", "-m", "initial"]);
@@ -577,14 +581,22 @@ globs = ["src/ui/**"]
 
         let c = repo.find_commit(results[0].commit_id).unwrap();
         let tree = c.tree().unwrap();
-        assert!(tree.lookup_entry_by_path("src/ui/bar.ts").unwrap().is_some());
-        assert!(tree.lookup_entry_by_path("src/ui/foo.ts").unwrap().is_none());
+        assert!(
+            tree.lookup_entry_by_path("src/ui/bar.ts")
+                .unwrap()
+                .is_some()
+        );
+        assert!(
+            tree.lookup_entry_by_path("src/ui/foo.ts")
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[test]
     fn range_incremental_trees() {
         let dir = tempfile::tempdir().unwrap();
-        git(dir.path(), &["init"]);
+        git(dir.path(), &["init", "-b", "main"]);
         git(dir.path(), &["config", "user.email", "test@test.com"]);
         git(dir.path(), &["config", "user.name", "Test"]);
         git(dir.path(), &["commit", "--allow-empty", "-m", "initial"]);
@@ -641,28 +653,58 @@ globs = ["src/ui/**"]
         let final_tree = final_commit.tree().unwrap();
 
         // Final tree should have both bar.ts and baz.ts (incremental)
-        assert!(final_tree.lookup_entry_by_path("src/ui/bar.ts").unwrap().is_some());
-        assert!(final_tree.lookup_entry_by_path("src/ui/baz.ts").unwrap().is_some());
+        assert!(
+            final_tree
+                .lookup_entry_by_path("src/ui/bar.ts")
+                .unwrap()
+                .is_some()
+        );
+        assert!(
+            final_tree
+                .lookup_entry_by_path("src/ui/baz.ts")
+                .unwrap()
+                .is_some()
+        );
 
         // Walk back: the final commit's parent should also have bar.ts
         let parent_id = final_commit.parent_ids().next().unwrap().detach();
         let parent_commit = repo.find_commit(parent_id).unwrap();
         let parent_tree = parent_commit.tree().unwrap();
-        assert!(parent_tree.lookup_entry_by_path("src/ui/bar.ts").unwrap().is_some());
-        assert!(parent_tree.lookup_entry_by_path("src/ui/baz.ts").unwrap().is_some());
+        assert!(
+            parent_tree
+                .lookup_entry_by_path("src/ui/bar.ts")
+                .unwrap()
+                .is_some()
+        );
+        assert!(
+            parent_tree
+                .lookup_entry_by_path("src/ui/baz.ts")
+                .unwrap()
+                .is_some()
+        );
 
         // And the grandparent (first component commit) should have only bar.ts
         let grandparent_id = parent_commit.parent_ids().next().unwrap().detach();
         let grandparent_commit = repo.find_commit(grandparent_id).unwrap();
         let grandparent_tree = grandparent_commit.tree().unwrap();
-        assert!(grandparent_tree.lookup_entry_by_path("src/ui/bar.ts").unwrap().is_some());
-        assert!(grandparent_tree.lookup_entry_by_path("src/ui/baz.ts").unwrap().is_none());
+        assert!(
+            grandparent_tree
+                .lookup_entry_by_path("src/ui/bar.ts")
+                .unwrap()
+                .is_some()
+        );
+        assert!(
+            grandparent_tree
+                .lookup_entry_by_path("src/ui/baz.ts")
+                .unwrap()
+                .is_none()
+        );
     }
 
     #[test]
     fn range_empty_produces_no_results() {
         let dir = tempfile::tempdir().unwrap();
-        git(dir.path(), &["init"]);
+        git(dir.path(), &["init", "-b", "main"]);
         git(dir.path(), &["config", "user.email", "test@test.com"]);
         git(dir.path(), &["config", "user.name", "Test"]);
         git(dir.path(), &["commit", "--allow-empty", "-m", "initial"]);

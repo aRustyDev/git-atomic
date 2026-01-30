@@ -5,10 +5,9 @@ use std::path::Path;
 
 pub fn run(config_path: &Path, printer: &Printer) -> Result<(), Error> {
     // Try to open repo for git config layer (non-fatal if outside repo)
-    let repo = crate::git::open_repo(
-        &std::env::current_dir().map_err(|e| Error::General(e.to_string()))?,
-    )
-    .ok();
+    let repo =
+        crate::git::open_repo(&std::env::current_dir().map_err(|e| Error::General(e.to_string()))?)
+            .ok();
 
     match crate::config::load_layered_config(repo.as_ref(), config_path) {
         Ok(resolved) => {

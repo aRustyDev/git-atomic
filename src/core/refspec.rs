@@ -37,20 +37,35 @@ mod tests {
 
     #[test]
     fn parse_single_ref() {
-        assert_eq!(RefSpec::parse("HEAD").unwrap(), RefSpec::Single("HEAD".into()));
-        assert_eq!(RefSpec::parse("abc123").unwrap(), RefSpec::Single("abc123".into()));
-        assert_eq!(RefSpec::parse("HEAD~3").unwrap(), RefSpec::Single("HEAD~3".into()));
+        assert_eq!(
+            RefSpec::parse("HEAD").unwrap(),
+            RefSpec::Single("HEAD".into())
+        );
+        assert_eq!(
+            RefSpec::parse("abc123").unwrap(),
+            RefSpec::Single("abc123".into())
+        );
+        assert_eq!(
+            RefSpec::parse("HEAD~3").unwrap(),
+            RefSpec::Single("HEAD~3".into())
+        );
     }
 
     #[test]
     fn parse_range() {
         assert_eq!(
             RefSpec::parse("main..feature").unwrap(),
-            RefSpec::Range { start: "main".into(), end: "feature".into() }
+            RefSpec::Range {
+                start: "main".into(),
+                end: "feature".into()
+            }
         );
         assert_eq!(
             RefSpec::parse("HEAD~3..HEAD").unwrap(),
-            RefSpec::Range { start: "HEAD~3".into(), end: "HEAD".into() }
+            RefSpec::Range {
+                start: "HEAD~3".into(),
+                end: "HEAD".into()
+            }
         );
     }
 
@@ -58,15 +73,24 @@ mod tests {
     fn parse_empty_sides_default_to_head() {
         assert_eq!(
             RefSpec::parse("..feature").unwrap(),
-            RefSpec::Range { start: "HEAD".into(), end: "feature".into() }
+            RefSpec::Range {
+                start: "HEAD".into(),
+                end: "feature".into()
+            }
         );
         assert_eq!(
             RefSpec::parse("main..").unwrap(),
-            RefSpec::Range { start: "main".into(), end: "HEAD".into() }
+            RefSpec::Range {
+                start: "main".into(),
+                end: "HEAD".into()
+            }
         );
         assert_eq!(
             RefSpec::parse("..").unwrap(),
-            RefSpec::Range { start: "HEAD".into(), end: "HEAD".into() }
+            RefSpec::Range {
+                start: "HEAD".into(),
+                end: "HEAD".into()
+            }
         );
     }
 
@@ -118,10 +142,7 @@ mod tests {
             RefSpec::parse("   ").unwrap(),
             RefSpec::Single("   ".into())
         );
-        assert_eq!(
-            RefSpec::parse("\t").unwrap(),
-            RefSpec::Single("\t".into())
-        );
+        assert_eq!(RefSpec::parse("\t").unwrap(), RefSpec::Single("\t".into()));
     }
 
     #[test]
@@ -144,9 +165,6 @@ mod tests {
 
     #[test]
     fn parse_empty_string() {
-        assert_eq!(
-            RefSpec::parse("").unwrap(),
-            RefSpec::Single("".into())
-        );
+        assert_eq!(RefSpec::parse("").unwrap(), RefSpec::Single("".into()));
     }
 }

@@ -135,6 +135,7 @@ update:
     cargo update
 
 [group('util')]
+[macos]
 # Install dependencies
 install:
     cargo install tdd-guard-rust
@@ -150,3 +151,11 @@ install:
 [group('util')]
 outdated:
     cargo outdated -R
+
+[group('user')]
+notes:
+    ekphos "{{ justfile_directory() }}/docs" || error("ekphos not installed -> run 'just install'")
+
+# jira-sync:
+#     curl https://github.com/steveyegge/beads/raw/main/examples/jira-import/jira2jsonl.py
+#     curl https://github.com/steveyegge/beads/raw/main/examples/jira-import/jsonl2jira.py

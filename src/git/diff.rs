@@ -23,7 +23,10 @@ pub fn resolve_commit(repo: &gix::Repository, reference: &str) -> Result<ObjectI
 
 /// Return the list of changed file paths between a commit and its parent.
 /// For initial commits (no parent), diffs against the empty tree.
-pub fn changed_files(repo: &gix::Repository, commit_id: ObjectId) -> Result<Vec<PathBuf>, GitError> {
+pub fn changed_files(
+    repo: &gix::Repository,
+    commit_id: ObjectId,
+) -> Result<Vec<PathBuf>, GitError> {
     let commit = repo
         .find_commit(commit_id)
         .map_err(|e| GitError::Operation(format!("find commit: {e}")))?;
@@ -64,7 +67,7 @@ mod tests {
 
     fn init_repo_with_commit(dir: &Path) -> ObjectId {
         Command::new("git")
-            .args(["init"])
+            .args(["init", "-b", "main"])
             .current_dir(dir)
             .output()
             .unwrap();
@@ -99,7 +102,7 @@ mod tests {
     fn open_valid_repo() {
         let dir = tempfile::tempdir().unwrap();
         Command::new("git")
-            .args(["init"])
+            .args(["init", "-b", "main"])
             .current_dir(dir.path())
             .output()
             .unwrap();

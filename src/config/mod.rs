@@ -3,7 +3,7 @@ pub mod layered;
 pub mod source;
 pub mod types;
 
-pub use layered::{load_layered_config, ResolvedConfig};
+pub use layered::{ResolvedConfig, load_layered_config};
 pub use source::{ConfigSource, Sourced};
 pub use types::{Component, Config, Settings, UnmatchedPolicy};
 
